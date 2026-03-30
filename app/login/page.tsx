@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -80,6 +81,11 @@ export default function LoginPage() {
             {loading ? '登入中...' : '登入'}
           </button>
         </form>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          還沒有帳號？
+          <Link href="/register" className="text-blue-600 hover:underline ml-1">立即註冊</Link>
+        </p>
       </div>
     </div>
   )
