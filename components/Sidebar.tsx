@@ -25,6 +25,12 @@ const nhiItems = [
   { href: '/nhi/point-values', label: '點值設定', icon: '⚕️', adminOnly: true },
 ]
 
+const payrollItems = [
+  { href: '/payroll/employees', label: '員工管理', icon: '👤' },
+  { href: '/payroll/schedules', label: '班表上傳', icon: '📅' },
+  { href: '/payroll/verify', label: '薪資核對', icon: '💰' },
+]
+
 const adminItems = [
   { href: '/admin/branches', label: '分公司管理', icon: '🏠' },
   { href: '/admin/users', label: '用戶管理', icon: '👥' },
@@ -93,6 +99,27 @@ export default function Sidebar({ profile }: SidebarProps) {
                 <span>{item.label}</span>
               </Link>
             ))}
+        </>
+
+        {/* 薪資管理 */}
+        <>
+          <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            薪資管理
+          </div>
+          {payrollItems.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                pathname === item.href || pathname.startsWith(item.href + '/')
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
         </>
 
         {isAdmin && (

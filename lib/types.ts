@@ -118,6 +118,51 @@ export interface ResidentMonthlyFee {
   resident?: Resident
 }
 
+// 員工
+export interface Employee {
+  id: string
+  branch_id: string
+  name: string
+  title?: string | null
+  employee_type: 'monthly' | 'hourly'
+  base_salary: number
+  hourly_rate: number
+  night_shift_allowance: number
+  labor_insurance: number
+  health_insurance: number
+  is_active: boolean
+  created_at: string
+  branch?: Branch
+}
+
+// 員工月班表暨薪資
+export interface EmployeeMonthlySchedule {
+  id: string
+  branch_id: string
+  employee_id: string
+  year: number
+  month: number
+  days_d: number
+  days_e: number
+  days_n: number
+  days_a: number
+  days_p: number
+  days_off: number
+  days_sick: number
+  days_absent: number
+  extra_hours: number
+  total_work_hours: number
+  overtime_pay: number
+  night_allowance: number
+  gross_salary: number
+  absence_deduction: number
+  calculated_net: number
+  actual_paid: number
+  voucher_id?: string | null
+  notes?: string | null
+  employee?: Employee
+}
+
 // OCR 解析結果
 export interface OcrResult {
   date: string | null
