@@ -27,11 +27,16 @@ interface Props {
   isAdmin: boolean
 }
 
-const emptyForm = (branchId: string) => ({
+const emptyForm = (branchId: string): {
+  branch_id: string; name: string; title: string
+  employee_type: 'monthly' | 'hourly'
+  base_salary: string; hourly_rate: string; night_shift_allowance: string
+  labor_insurance: string; health_insurance: string
+} => ({
   branch_id: branchId,
   name: '',
   title: '',
-  employee_type: 'monthly' as const,
+  employee_type: 'monthly',
   base_salary: '',
   hourly_rate: '200',
   night_shift_allowance: '200',
@@ -60,7 +65,7 @@ export default function EmployeeManager({ employees, branches, defaultBranchId, 
       branch_id: emp.branch_id,
       name: emp.name,
       title: emp.title || '',
-      employee_type: emp.employee_type,
+      employee_type: emp.employee_type as 'monthly' | 'hourly',
       base_salary: String(emp.base_salary),
       hourly_rate: String(emp.hourly_rate),
       night_shift_allowance: String(emp.night_shift_allowance),
