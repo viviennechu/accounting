@@ -34,7 +34,7 @@ export default async function BranchesPage() {
             {(branches || []).map(b => (
               <tr key={b.id} className="border-b border-gray-100 last:border-0">
                 <td className="px-4 py-3 font-medium">{b.name}</td>
-                <td className="px-4 py-3 text-gray-500 font-mono">{b.code}</td>
+                <td className="px-4 py-3 text-gray-700 font-mono">{b.code}</td>
                 <td className="px-4 py-3 text-gray-500 text-xs">
                   {new Date(b.created_at).toLocaleDateString('zh-TW')}
                 </td>

@@ -72,7 +72,7 @@ export default async function VoucherDetailPage({
             <tbody>
               {lines.map((line: any) => (
                 <tr key={line.id} className="border-b border-gray-100">
-                  <td className="py-2 text-gray-500">{line.account?.code}</td>
+                  <td className="py-2 text-gray-700">{line.account?.code}</td>
                   <td className="py-2">{line.account?.name}</td>
                   <td className="py-2 text-gray-600">{line.note || '—'}</td>
                   <td className="py-2 text-right font-mono">{line.debit > 0 ? formatCurrency(line.debit) : ''}</td>

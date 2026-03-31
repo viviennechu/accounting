@@ -107,7 +107,7 @@ export default async function VouchersPage({
                               {v.date}
                             </Link>
                           </td>
-                          <td rowSpan={lines.length} className="text-center align-top pt-2 text-gray-500 text-xs">
+                          <td rowSpan={lines.length} className="text-center align-top pt-2 text-gray-700 text-xs">
                             {v.voucher_no || '-'}
                           </td>
                           {isAdmin && (

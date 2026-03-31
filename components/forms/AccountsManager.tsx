@@ -157,8 +157,8 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
             <tbody>
               {items.map(a => (
                 <tr key={a.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-4 py-2 text-gray-500 w-20">{a.code}</td>
-                  <td className="px-4 py-2">{a.name}</td>
+                  <td className="px-4 py-2 text-gray-700 w-20">{a.code}</td>
+                  <td className="px-4 py-2 text-gray-900">{a.name}</td>
                   <td className="px-4 py-2 text-right">
                     <button
                       onClick={() => toggleActive(a.id, a.is_active ?? true)}

@@ -152,7 +152,7 @@ export default async function AnnualReportPage({
                     const total = Object.values(row.monthly).reduce((s, v) => s + v, 0)
                     return (
                       <tr key={row.code}>
-                        <td className="text-gray-500">{row.code}</td>
+                        <td className="text-gray-700">{row.code}</td>
                         <td>{row.name}</td>
                         {months.map(m => (
                           <td key={m} className="font-mono">
@@ -160,7 +160,7 @@ export default async function AnnualReportPage({
                           </td>
                         ))}
                         <td className="font-mono font-semibold">{formatCurrency(total)}</td>
-                        <td className="font-mono text-gray-500">{formatCurrency(Math.round(total / 12))}</td>
+                        <td className="font-mono text-gray-700">{formatCurrency(Math.round(total / 12))}</td>
                       </tr>
                     )
                   }),
@@ -172,7 +172,7 @@ export default async function AnnualReportPage({
                       <td key={m} className="font-mono">{formatCurrency(subtotal(type, m))}</td>
                     ))}
                     <td className="font-mono">{formatCurrency(st)}</td>
-                    <td className="font-mono text-gray-500">{formatCurrency(Math.round(st / 12))}</td>
+                    <td className="font-mono text-gray-700">{formatCurrency(Math.round(st / 12))}</td>
                   </tr>,
                 ]
               })}
@@ -196,7 +196,7 @@ export default async function AnnualReportPage({
                 <td className={`font-mono ${netIncome >= 0 ? 'text-green-700' : 'text-red-600'}`}>
                   {formatCurrency(netIncome)}
                 </td>
-                <td className="font-mono text-gray-500">{formatCurrency(Math.round(netIncome / 12))}</td>
+                <td className="font-mono text-gray-700">{formatCurrency(Math.round(netIncome / 12))}</td>
               </tr>
             </tbody>
           </table>

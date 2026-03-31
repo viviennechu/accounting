@@ -144,7 +144,7 @@ export default async function ConsolidatedPage({
                   </tr>,
                   ...typeRows.map(row => (
                     <tr key={row.code}>
-                      <td className="text-gray-500">{row.code}</td>
+                      <td className="text-gray-700">{row.code}</td>
                       <td>{row.name}</td>
                       {(branches || []).map(b => (
                         <td key={b.id} className="font-mono">
