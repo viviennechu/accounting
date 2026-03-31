@@ -21,7 +21,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: password.trim() })
 
     if (error) {
-      setError('帳號或密碼錯誤，請重試')
+      setError(error.message)
       setLoading(false)
     } else {
       router.push('/dashboard')
