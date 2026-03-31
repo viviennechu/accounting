@@ -31,8 +31,11 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // 未登入且不在登入頁，導向登入
-  if (!user && !pathname.startsWith('/login')) {
+  const publicPaths = ['/login', '/register', '/auth/', '/reset-password']
+  const isPublic = publicPaths.some(p => pathname.startsWith(p))
+
+  // 未登入且不在公開頁，導向登入
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
