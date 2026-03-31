@@ -15,8 +15,8 @@ interface Props {
     admission_date: string
     discharge_date?: string | null
     subsidy_type: string
-    monthly_self_pay: number
-    monthly_subsidy: number
+    daily_self_pay: number
+    daily_subsidy_rate: number
     notes?: string | null
   }
 }
@@ -27,8 +27,8 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
   const [name, setName] = useState(initial?.name || '')
   const [admissionDate, setAdmissionDate] = useState(initial?.admission_date || new Date().toISOString().split('T')[0])
   const [subsidyType, setSubsidyType] = useState(initial?.subsidy_type || 'self')
-  const [monthlySelfPay, setMonthlySelfPay] = useState(String(initial?.monthly_self_pay || ''))
-  const [monthlySubsidy, setMonthlySubsidy] = useState(String(initial?.monthly_subsidy || ''))
+  const [dailySelfPay, setDailySelfPay] = useState(String(initial?.daily_self_pay || ''))
+  const [dailySubsidyRate, setDailySubsidyRate] = useState(String(initial?.daily_subsidy_rate || ''))
   const [notes, setNotes] = useState(initial?.notes || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -45,8 +45,11 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
       name: name.trim(),
       admission_date: admissionDate,
       subsidy_type: subsidyType,
-      monthly_self_pay: Number(monthlySelfPay) || 0,
-      monthly_subsidy: Number(monthlySubsidy) || 0,
+      daily_self_pay: Number(dailySelfPay) || 0,
+      daily_subsidy_rate: Number(dailySubsidyRate) || 0,
+      // 保留月費估算欄位（以日費率×30天估算）
+      monthly_self_pay: Math.round((Number(dailySelfPay) || 0) * 30),
+      monthly_subsidy: Math.round((Number(dailySubsidyRate) || 0) * 30),
       notes: notes || null,
     }
 
@@ -94,23 +97,29 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
         </select>
       </div>
 
-      {(subsidyType === 'self' || subsidyType === 'both') && (
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">每月自付額</label>
-          <input type="number" value={monthlySelfPay} onChange={e => setMonthlySelfPay(e.target.value)}
-            placeholder="0" min="0"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+        <p className="text-xs text-blue-700 mb-3 font-medium">💡 請填每日費率，系統依每月實際在院天數計算</p>
+        <div className="grid grid-cols-2 gap-3">
+          {(subsidyType === 'self' || subsidyType === 'both') && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">每日自付額（元）</label>
+              <input type="number" value={dailySelfPay} onChange={e => setDailySelfPay(e.target.value)}
+                placeholder="例：250" min="0"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
+              {dailySelfPay && <p className="text-xs text-gray-500 mt-1">月估算：{Math.round(Number(dailySelfPay) * 30).toLocaleString()} 元</p>}
+            </div>
+          )}
+          {(subsidyType === 'subsidy' || subsidyType === 'both') && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">每日補助費率（元）</label>
+              <input type="number" value={dailySubsidyRate} onChange={e => setDailySubsidyRate(e.target.value)}
+                placeholder="例：836" min="0"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
+              {dailySubsidyRate && <p className="text-xs text-gray-500 mt-1">月估算：{Math.round(Number(dailySubsidyRate) * 30).toLocaleString()} 元</p>}
+            </div>
+          )}
         </div>
-      )}
-
-      {(subsidyType === 'subsidy' || subsidyType === 'both') && (
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">每月補助金額</label>
-          <input type="number" value={monthlySubsidy} onChange={e => setMonthlySubsidy(e.target.value)}
-            placeholder="0" min="0"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
-        </div>
-      )}
+      </div>
 
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">備註</label>

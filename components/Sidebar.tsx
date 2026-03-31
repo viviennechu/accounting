@@ -20,8 +20,8 @@ const navItems = [
 
 const nhiItems = [
   { href: '/residents', label: '住民管理', icon: '🏥' },
-  { href: '/nhi/claims', label: '申報記錄', icon: '📄' },
-  { href: '/nhi/fees', label: '月費管理', icon: '💴' },
+  { href: '/nhi/attendance', label: '每月出席登錄', icon: '📅' },
+  { href: '/nhi/claims', label: '健保申報記錄', icon: '📄' },
   { href: '/nhi/point-values', label: '點值設定', icon: '⚕️', adminOnly: true },
 ]
 
