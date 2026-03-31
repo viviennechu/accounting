@@ -5,7 +5,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type')
-  const next = searchParams.get('next') ?? '/reset-password'
+  const defaultNext = type === 'recovery' ? '/reset-password' : '/dashboard'
+  const next = searchParams.get('next') ?? defaultNext
 
   if (token_hash && type) {
     const response = NextResponse.redirect(new URL(next, request.url))
