@@ -233,7 +233,7 @@ export default function EmployeeManager({ employees, branches, defaultBranchId, 
           <tbody>
             {employees.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 9 : 8} className="px-4 py-8 text-center text-gray-400">尚無員工資料</td>
+                <td colSpan={isAdmin ? 9 : 8} className="px-4 py-8 text-center text-gray-600">尚無員工資料</td>
               </tr>
             ) : employees.map(emp => (
               <tr key={emp.id} className="border-b border-gray-100 hover:bg-gray-50">

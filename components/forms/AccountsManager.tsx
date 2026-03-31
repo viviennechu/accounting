@@ -162,7 +162,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
                   <td className="px-4 py-2 text-right">
                     <button
                       onClick={() => toggleActive(a.id, a.is_active ?? true)}
-                      className={`text-xs px-2 py-0.5 rounded-full ${a.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                      className={`text-xs px-2 py-0.5 rounded-full ${a.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}
                     >
                       {a.is_active ? '啟用' : '停用'}
                     </button>
@@ -179,13 +179,13 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
         <div className="flex gap-2">
           <button
             onClick={() => setShowPreset(true)}
-            className="flex-1 bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+            className="flex-1 bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm text-gray-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
           >
             📋 從常用科目選
           </button>
           <button
             onClick={() => setAdding(true)}
-            className="flex-1 bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
+            className="flex-1 bg-white border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
           >
             ＋ 手動新增科目
           </button>
@@ -194,7 +194,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <span className="font-semibold text-gray-800">常用科目庫</span>
-            <button onClick={() => { setShowPreset(false); setSelectedPresets(new Set()) }} className="text-gray-400 hover:text-gray-600 text-sm">✕ 關閉</button>
+            <button onClick={() => { setShowPreset(false); setSelectedPresets(new Set()) }} className="text-gray-600 hover:text-gray-600 text-sm">✕ 關閉</button>
           </div>
           <div className="p-4 space-y-4">
             {Object.entries(TYPE_LABELS).map(([type, label]) => {
@@ -213,7 +213,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
                           key={p.code}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm cursor-pointer transition-colors ${
                             exists
-                              ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                              ? 'border-gray-100 bg-gray-50 text-gray-600 cursor-not-allowed'
                               : checked
                               ? 'border-blue-300 bg-blue-50 text-blue-800'
                               : 'border-gray-200 hover:border-gray-300 text-gray-700'
@@ -230,9 +230,9 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
                             }}
                             className="rounded"
                           />
-                          <span className="font-mono text-xs text-gray-400 w-10 shrink-0">{p.code}</span>
+                          <span className="font-mono text-xs text-gray-600 w-10 shrink-0">{p.code}</span>
                           <span>{p.name}</span>
-                          {exists && <span className="ml-auto text-xs text-gray-400">已新增</span>}
+                          {exists && <span className="ml-auto text-xs text-gray-600">已新增</span>}
                         </label>
                       )
                     })}
@@ -242,7 +242,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
             })}
           </div>
           <div className="px-4 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-            <span className="text-sm text-gray-500">已選 {selectedPresets.size} 項</span>
+            <span className="text-sm text-gray-700">已選 {selectedPresets.size} 項</span>
             <button
               onClick={handleAddPresets}
               disabled={saving || selectedPresets.size === 0}

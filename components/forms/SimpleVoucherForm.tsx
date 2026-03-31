@@ -190,7 +190,7 @@ export default function SimpleVoucherForm({ accounts, branches, defaultBranchId,
               <div>
                 <div className="text-3xl mb-2">📄</div>
                 <div className="text-sm text-blue-600">點擊選擇或拍攝發票/收據</div>
-                <div className="text-xs text-gray-500 mt-1">支援 JPG、PNG</div>
+                <div className="text-xs text-gray-700 mt-1">支援 JPG、PNG</div>
               </div>
             )}
             <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
@@ -232,7 +232,7 @@ export default function SimpleVoucherForm({ accounts, branches, defaultBranchId,
             className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors ${
               type === 'expense'
                 ? 'bg-red-50 border-red-400 text-red-700'
-                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                : 'border-gray-200 text-gray-700 hover:border-gray-300'
             }`}
           >
             💸 支出
@@ -243,7 +243,7 @@ export default function SimpleVoucherForm({ accounts, branches, defaultBranchId,
             className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border-2 transition-colors ${
               type === 'income'
                 ? 'bg-green-50 border-green-400 text-green-700'
-                : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                : 'border-gray-200 text-gray-700 hover:border-gray-300'
             }`}
           >
             💰 收入
@@ -358,7 +358,7 @@ export default function SimpleVoucherForm({ accounts, branches, defaultBranchId,
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-gray-800">分錄預覽</h2>
-            <span className="text-xs text-gray-500">金額有誤可直接修改</span>
+            <span className="text-xs text-gray-700">金額有誤可直接修改</span>
           </div>
           <table className="w-full text-sm">
             <thead>

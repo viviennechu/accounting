@@ -195,7 +195,7 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
       </div>
 
       {schedules.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
           此月份尚無班表記錄，請先至「班表上傳」輸入班表
         </div>
       ) : (
@@ -203,15 +203,15 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
           {/* 摘要卡 */}
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-xs text-gray-500 mb-1">系統計算應發</div>
+              <div className="text-xs text-gray-700 mb-1">系統計算應發</div>
               <div className="text-xl font-bold text-blue-700 font-mono">{formatCurrency(totalCalculated)}</div>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-xs text-gray-500 mb-1">實際發放合計</div>
+              <div className="text-xs text-gray-700 mb-1">實際發放合計</div>
               <div className="text-xl font-bold text-gray-800 font-mono">{formatCurrency(totalActual)}</div>
             </div>
             <div className={`border rounded-xl p-4 ${Math.abs(totalDiff) < 10 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="text-xs text-gray-500 mb-1">差異（實發－應發）</div>
+              <div className="text-xs text-gray-700 mb-1">差異（實發－應發）</div>
               <div className={`text-xl font-bold font-mono ${Math.abs(totalDiff) < 10 ? 'text-green-700' : 'text-red-600'}`}>
                 {totalDiff >= 0 ? '+' : ''}{formatCurrency(totalDiff)}
               </div>
@@ -287,7 +287,7 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           {actual === 0 ? (
-                            <span className="text-gray-400 text-xs">未填</span>
+                            <span className="text-gray-600 text-xs">未填</span>
                           ) : match ? (
                             <span className="text-green-600 text-xs font-medium">✓ 相符</span>
                           ) : (

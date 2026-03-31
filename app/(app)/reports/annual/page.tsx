@@ -102,7 +102,7 @@ export default async function AnnualReportPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">年度總表</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-gray-700 text-sm mt-1">
             {year}年度 · {currentBranch?.name || (isAdmin ? '所有分公司' : profile?.branch?.name)}
           </p>
         </div>

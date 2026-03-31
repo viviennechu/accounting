@@ -88,7 +88,7 @@ export default async function ConsolidatedPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">合併報表</h1>
-          <p className="text-gray-500 text-sm mt-1">{year}年度 · 所有分公司</p>
+          <p className="text-gray-700 text-sm mt-1">{year}年度 · 所有分公司</p>
         </div>
         <a
           href={`/api/reports/export?year=${year}&format=excel&consolidated=true`}
@@ -109,7 +109,7 @@ export default async function ConsolidatedPage({
           return (
             <div key={b.id} className="bg-white border border-gray-200 rounded-xl p-4">
               <div className="font-semibold text-gray-700 mb-2">{b.name}</div>
-              <div className="text-xs text-gray-500">年度盈餘</div>
+              <div className="text-xs text-gray-700">年度盈餘</div>
               <div className={`text-xl font-bold ${net >= 0 ? 'text-green-700' : 'text-red-600'}`}>
                 {formatCurrency(net)}
               </div>

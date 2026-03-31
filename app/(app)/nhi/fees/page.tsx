@@ -91,7 +91,7 @@ export default async function ResidentFeesPage({
             </thead>
             <tbody>
               {!residents || residents.length === 0 ? (
-                <tr><td colSpan={7} className="text-center text-gray-400 py-8">本月尚無在籍住民</td></tr>
+                <tr><td colSpan={7} className="text-center text-gray-600 py-8">本月尚無在籍住民</td></tr>
               ) : residents.map(r => {
                 const fee = feeMap[r.id]
                 const subsidyLabel = ({ self: '自費', subsidy: '補助', both: '自費＋補助' } as any)[r.subsidy_type]
@@ -118,7 +118,7 @@ export default async function ResidentFeesPage({
                           feeId={fee?.id}
                         />
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <span className="text-xs text-gray-600">-</span>
                       )}
                     </td>
                   </tr>

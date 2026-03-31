@@ -40,7 +40,7 @@ export default async function DashboardPage() {
     <div className="max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">儀表板</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-gray-700 text-sm mt-1">
           {year}年 {month}月 · {isAdmin ? '總管理者' : profile?.branch?.name}
         </p>
       </div>
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
         >
           <div className="text-2xl mb-2">📋</div>
           <div className="font-semibold text-gray-800">傳票日記簿</div>
-          <div className="text-gray-500 text-sm mt-1">本月已記 {voucherCount || 0} 筆傳票</div>
+          <div className="text-gray-700 text-sm mt-1">本月已記 {voucherCount || 0} 筆傳票</div>
         </Link>
 
         <Link
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
         >
           <div className="text-2xl mb-2">📈</div>
           <div className="font-semibold text-gray-800">年度總表</div>
-          <div className="text-gray-500 text-sm mt-1">查看 {year} 年度收支報表</div>
+          <div className="text-gray-700 text-sm mt-1">查看 {year} 年度收支報表</div>
         </Link>
       </div>
 

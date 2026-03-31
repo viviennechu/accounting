@@ -97,7 +97,7 @@ export default function ReceivePaymentButton({ claimId, branchId, serviceYear, s
             <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
             {expectedAmount > 0 && (
-              <p className="text-xs text-gray-500 mt-1">預計：{formatCurrency(expectedAmount)}</p>
+              <p className="text-xs text-gray-700 mt-1">預計：{formatCurrency(expectedAmount)}</p>
             )}
           </div>
 

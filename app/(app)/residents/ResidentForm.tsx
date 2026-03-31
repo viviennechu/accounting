@@ -106,7 +106,7 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
               <input type="number" value={dailySelfPay} onChange={e => setDailySelfPay(e.target.value)}
                 placeholder="例：250" min="0"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
-              {dailySelfPay && <p className="text-xs text-gray-500 mt-1">月估算：{Math.round(Number(dailySelfPay) * 30).toLocaleString()} 元</p>}
+              {dailySelfPay && <p className="text-xs text-gray-700 mt-1">月估算：{Math.round(Number(dailySelfPay) * 30).toLocaleString()} 元</p>}
             </div>
           )}
           {(subsidyType === 'subsidy' || subsidyType === 'both') && (
@@ -115,7 +115,7 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
               <input type="number" value={dailySubsidyRate} onChange={e => setDailySubsidyRate(e.target.value)}
                 placeholder="例：836" min="0"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
-              {dailySubsidyRate && <p className="text-xs text-gray-500 mt-1">月估算：{Math.round(Number(dailySubsidyRate) * 30).toLocaleString()} 元</p>}
+              {dailySubsidyRate && <p className="text-xs text-gray-700 mt-1">月估算：{Math.round(Number(dailySubsidyRate) * 30).toLocaleString()} 元</p>}
             </div>
           )}
         </div>

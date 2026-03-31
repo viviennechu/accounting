@@ -67,7 +67,7 @@ export default async function LedgerPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">流水帳</h1>
-          <p className="text-gray-500 text-sm mt-1">{year}年{month}月</p>
+          <p className="text-gray-700 text-sm mt-1">{year}年{month}月</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export default async function LedgerPage({
             <tbody>
               {!vouchers || vouchers.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-400 py-8">
+                  <td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-600 py-8">
                     本月尚無記錄
                   </td>
                 </tr>

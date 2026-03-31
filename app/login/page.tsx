@@ -35,7 +35,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🏥</div>
           <h1 className="text-2xl font-bold text-gray-800">康復之家記帳系統</h1>
-          <p className="text-gray-500 text-sm mt-1">請登入您的帳號</p>
+          <p className="text-gray-700 text-sm mt-1">請登入您的帳號</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -82,7 +82,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-700 mt-4">
           還沒有帳號？
           <Link href="/register" className="text-blue-600 hover:underline ml-1">立即註冊</Link>
         </p>

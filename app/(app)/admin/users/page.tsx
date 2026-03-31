@@ -21,7 +21,7 @@ export default async function UsersPage() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">用戶管理</h1>
-        <p className="text-sm text-gray-500">新增用戶請至 Supabase 後台 Auth 頁面邀請</p>
+        <p className="text-sm text-gray-700">新增用戶請至 Supabase 後台 Auth 頁面邀請</p>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -48,7 +48,7 @@ export default async function UsersPage() {
                     {u.role === 'admin' ? '管理者' : u.role === 'accountant' ? '記帳人員' : '檢視者'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-500 text-xs">
+                <td className="px-4 py-3 text-gray-700 text-xs">
                   {new Date(u.created_at).toLocaleDateString('zh-TW')}
                 </td>
               </tr>

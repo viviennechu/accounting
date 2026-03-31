@@ -30,7 +30,7 @@ export default async function VoucherDetailPage({
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/vouchers" className="text-gray-500 hover:text-gray-700">← 傳票清單</Link>
+        <Link href="/vouchers" className="text-gray-700 hover:text-gray-700">← 傳票清單</Link>
         <span className="text-gray-300">|</span>
         <h1 className="text-xl font-bold text-gray-800">傳票詳情</h1>
       </div>
@@ -39,19 +39,19 @@ export default async function VoucherDetailPage({
         {/* 基本資訊 */}
         <div className="grid grid-cols-3 gap-4 text-sm border-b border-gray-100 pb-4">
           <div>
-            <div className="text-gray-500 text-xs mb-1">傳票日期</div>
+            <div className="text-gray-700 text-xs mb-1">傳票日期</div>
             <div className="font-medium">{voucher.date}</div>
           </div>
           <div>
-            <div className="text-gray-500 text-xs mb-1">傳票編號</div>
+            <div className="text-gray-700 text-xs mb-1">傳票編號</div>
             <div className="font-medium">{voucher.voucher_no || '—'}</div>
           </div>
           <div>
-            <div className="text-gray-500 text-xs mb-1">分公司</div>
+            <div className="text-gray-700 text-xs mb-1">分公司</div>
             <div className="font-medium">{(voucher.branch as any)?.name}</div>
           </div>
           <div className="col-span-3">
-            <div className="text-gray-500 text-xs mb-1">摘要</div>
+            <div className="text-gray-700 text-xs mb-1">摘要</div>
             <div className="font-medium">{voucher.description || '—'}</div>
           </div>
         </div>
@@ -62,11 +62,11 @@ export default async function VoucherDetailPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left pb-2 text-gray-500 font-medium">科目代號</th>
-                <th className="text-left pb-2 text-gray-500 font-medium">科目名稱</th>
-                <th className="text-left pb-2 text-gray-500 font-medium">摘要</th>
-                <th className="text-right pb-2 text-gray-500 font-medium">借方</th>
-                <th className="text-right pb-2 text-gray-500 font-medium">貸方</th>
+                <th className="text-left pb-2 text-gray-700 font-medium">科目代號</th>
+                <th className="text-left pb-2 text-gray-700 font-medium">科目名稱</th>
+                <th className="text-left pb-2 text-gray-700 font-medium">摘要</th>
+                <th className="text-right pb-2 text-gray-700 font-medium">借方</th>
+                <th className="text-right pb-2 text-gray-700 font-medium">貸方</th>
               </tr>
             </thead>
             <tbody>
@@ -102,7 +102,7 @@ export default async function VoucherDetailPage({
           </div>
         )}
 
-        <div className="text-xs text-gray-400 border-t border-gray-100 pt-3">
+        <div className="text-xs text-gray-600 border-t border-gray-100 pt-3">
           建立時間：{new Date(voucher.created_at).toLocaleString('zh-TW')}
         </div>
       </div>

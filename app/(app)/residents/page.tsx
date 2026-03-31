@@ -78,7 +78,7 @@ export default async function ResidentsPage() {
             </thead>
             <tbody>
               {active.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-400 py-8">尚無在籍住民</td></tr>
+                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-600 py-8">尚無在籍住民</td></tr>
               ) : active.map(r => (
                 <tr key={r.id}>
                   <td className="font-medium text-gray-900">{r.name}</td>

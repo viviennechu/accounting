@@ -35,7 +35,7 @@ export default async function BranchesPage() {
               <tr key={b.id} className="border-b border-gray-100 last:border-0">
                 <td className="px-4 py-3 font-medium">{b.name}</td>
                 <td className="px-4 py-3 text-gray-700 font-mono">{b.code}</td>
-                <td className="px-4 py-3 text-gray-500 text-xs">
+                <td className="px-4 py-3 text-gray-700 text-xs">
                   {new Date(b.created_at).toLocaleDateString('zh-TW')}
                 </td>
               </tr>
@@ -44,7 +44,7 @@ export default async function BranchesPage() {
         </table>
       </div>
 
-      <p className="text-sm text-gray-400 mt-3">如需新增分公司，請聯繫系統管理員直接更新資料庫。</p>
+      <p className="text-sm text-gray-600 mt-3">如需新增分公司，請聯繫系統管理員直接更新資料庫。</p>
     </div>
   )
 }

@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">🔐</div>
           <h1 className="text-2xl font-bold text-gray-800">設定新密碼</h1>
-          <p className="text-gray-500 text-sm mt-1">請輸入您的新密碼</p>
+          <p className="text-gray-700 text-sm mt-1">請輸入您的新密碼</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

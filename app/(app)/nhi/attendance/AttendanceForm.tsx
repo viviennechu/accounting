@@ -166,7 +166,7 @@ export default function AttendanceForm({ year, month, daysInMonth, branchId, bra
       </div>
 
       {residents.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
           此分公司尚無在籍住民
         </div>
       ) : (
@@ -174,7 +174,7 @@ export default function AttendanceForm({ year, month, daysInMonth, branchId, bra
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <div>
               <span className="font-semibold text-gray-800">{selectedYear} 年 {selectedMonth} 月出席記錄</span>
-              <span className="ml-2 text-xs text-gray-500">當月 {daysInMonth} 天・{residents.length} 位住民</span>
+              <span className="ml-2 text-xs text-gray-700">當月 {daysInMonth} 天・{residents.length} 位住民</span>
             </div>
             <div className="flex items-center gap-3">
               {saved && <span className="text-green-600 text-sm">✓ 已儲存</span>}

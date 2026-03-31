@@ -280,7 +280,7 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
       )}
 
       {employees.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-400">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
           此分公司尚無在職員工，請先至「員工管理」新增員工
         </div>
       ) : (
@@ -288,7 +288,7 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <div>
               <span className="font-semibold text-gray-800">{selectedYear} 年 {selectedMonth} 月班表</span>
-              <span className="ml-2 text-xs text-gray-500">{employees.length} 位員工</span>
+              <span className="ml-2 text-xs text-gray-700">{employees.length} 位員工</span>
             </div>
             <div className="flex items-center gap-3">
               {saved && <span className="text-green-600 text-sm">✓ 已儲存</span>}
@@ -326,7 +326,7 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
                     <tr key={emp.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-4 py-2 sticky left-0 bg-white">
                         <div className="font-medium text-gray-900">{emp.name}</div>
-                        <div className="text-xs text-gray-500">{emp.employee_type === 'monthly' ? `月薪 ${formatCurrency(emp.base_salary)}` : `時薪 ${emp.hourly_rate}`}</div>
+                        <div className="text-xs text-gray-700">{emp.employee_type === 'monthly' ? `月薪 ${formatCurrency(emp.base_salary)}` : `時薪 ${emp.hourly_rate}`}</div>
                       </td>
                       {(['days_d', 'days_e', 'days_n', 'days_a', 'days_p', 'days_off', 'days_sick', 'days_absent'] as const).map(field => (
                         <td key={field} className="px-2 py-2 text-center">

@@ -141,7 +141,7 @@ export default async function NhiClaimsPage() {
             </thead>
             <tbody>
               {received.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-400 py-8">尚無已收款記錄</td></tr>
+                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-600 py-8">尚無已收款記錄</td></tr>
               ) : received.map(c => (
                 <tr key={c.id}>
                   <td className="font-medium text-gray-900">{c.service_year}年{c.service_month}月</td>

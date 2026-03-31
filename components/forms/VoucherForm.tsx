@@ -200,7 +200,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
               <div>
                 <div className="text-3xl mb-2">📄</div>
                 <div className="text-sm text-blue-600">點擊選擇或拍攝發票/收據</div>
-                <div className="text-xs text-gray-400 mt-1">支援 JPG、PNG</div>
+                <div className="text-xs text-gray-600 mt-1">支援 JPG、PNG</div>
               </div>
             )}
             <input
@@ -298,18 +298,18 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left pb-2 text-gray-500 font-medium w-8">#</th>
-                <th className="text-left pb-2 text-gray-500 font-medium">科目</th>
-                <th className="text-left pb-2 text-gray-500 font-medium w-32">摘要</th>
-                <th className="text-right pb-2 text-gray-500 font-medium w-28">借方金額</th>
-                <th className="text-right pb-2 text-gray-500 font-medium w-28">貸方金額</th>
+                <th className="text-left pb-2 text-gray-700 font-medium w-8">#</th>
+                <th className="text-left pb-2 text-gray-700 font-medium">科目</th>
+                <th className="text-left pb-2 text-gray-700 font-medium w-32">摘要</th>
+                <th className="text-right pb-2 text-gray-700 font-medium w-28">借方金額</th>
+                <th className="text-right pb-2 text-gray-700 font-medium w-28">貸方金額</th>
                 <th className="w-8"></th>
               </tr>
             </thead>
             <tbody>
               {lines.map((line, idx) => (
                 <tr key={idx} className="border-b border-gray-100">
-                  <td className="py-2 text-gray-400 text-xs">{idx + 1}</td>
+                  <td className="py-2 text-gray-600 text-xs">{idx + 1}</td>
                   <td className="py-2 pr-2">
                     <select
                       value={line.account_id}
@@ -359,7 +359,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
                     <button
                       type="button"
                       onClick={() => removeLine(idx)}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      className="text-gray-600 hover:text-red-500 transition-colors"
                     >
                       ✕
                     </button>

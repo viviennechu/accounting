@@ -86,7 +86,7 @@ export default function RegisterPage() {
         <div className="text-center mb-6">
           <div className="text-4xl mb-3">🏥</div>
           <h1 className="text-2xl font-bold text-gray-800">建立帳號</h1>
-          <p className="text-gray-500 text-sm mt-1">康復之家記帳系統</p>
+          <p className="text-gray-700 text-sm mt-1">康復之家記帳系統</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
@@ -166,7 +166,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-gray-700 mt-4">
           已有帳號？
           <Link href="/login" className="text-blue-600 hover:underline ml-1">登入</Link>
         </p>

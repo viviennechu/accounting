@@ -203,7 +203,7 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
       >
         <div className="text-3xl mb-2">📊</div>
         <div className="text-gray-700 font-medium">{fileName || '點擊選擇 Excel 檔案'}</div>
-        <div className="text-xs text-gray-400 mt-1">支援 .xlsx / .xls</div>
+        <div className="text-xs text-gray-600 mt-1">支援 .xlsx / .xls</div>
         <input
           ref={fileRef}
           type="file"
@@ -261,7 +261,7 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
               <tbody>
                 {rows.map((row, idx) => (
                   <tr key={idx} className={`border-b border-gray-100 ${row.error ? 'bg-red-50' : ''}`}>
-                    <td className="px-3 py-2 text-gray-400 text-xs">{idx + 1}</td>
+                    <td className="px-3 py-2 text-gray-600 text-xs">{idx + 1}</td>
                     <td className="px-3 py-2">
                       <input
                         type="text"
@@ -322,7 +322,7 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
                       ) : (
                         <span className="text-green-500 text-xs">✓</span>
                       )}
-                      <button onClick={() => removeRow(idx)} className="ml-1 text-gray-400 hover:text-red-500 text-xs">✕</button>
+                      <button onClick={() => removeRow(idx)} className="ml-1 text-gray-600 hover:text-red-500 text-xs">✕</button>
                     </td>
                   </tr>
                 ))}
