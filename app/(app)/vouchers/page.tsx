@@ -43,7 +43,7 @@ export default async function VouchersPage({
     query = query.eq('branch_id', branchId)
   }
 
-  const { data: vouchers } = await query
+  const { data: vouchers, error: voucherError } = await query
 
   // 取得分公司清單（admin 用）
   const { data: branches } = await supabase.from('branches').select('id, name')
@@ -71,6 +71,12 @@ export default async function VouchersPage({
         showMonth
         showBranch={isAdmin}
       />
+
+      {voucherError && (
+        <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-4 text-red-700 text-sm">
+          查詢錯誤：{voucherError.message} | endDate: {endDate}
+        </div>
+      )}
 
       {/* 傳票清單 */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
