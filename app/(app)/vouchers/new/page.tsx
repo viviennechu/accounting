@@ -16,7 +16,7 @@ export default async function NewVoucherPage() {
   let accountQuery = supabase
     .from('accounts')
     .select('id, code, name, type, branch_id')
-    .eq('is_active', true)
+    .neq('is_active', false)
     .order('code')
 
   if (!isAdmin && profile?.branch_id) {
