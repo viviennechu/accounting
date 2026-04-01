@@ -4,6 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
+import { calcMonthlySalary, getMonthlyStandard } from '@/lib/payroll'
+
+interface Employee {
+  id: string
+  name: string
+  title?: string | null
+  base_salary: number
+  license_fee: number
+  labor_insurance: number
+  health_insurance: number
+}
 
 interface Schedule {
   id: string
@@ -19,21 +30,15 @@ interface Schedule {
   days_sick: number
   days_absent: number
   extra_hours: number
+  monthly_standard_hours: number
   total_work_hours: number
+  overtime_hours: number
   overtime_pay: number
-  night_allowance: number
   gross_salary: number
   absence_deduction: number
   calculated_net: number
   actual_paid: number
-  voucher_id?: string | null
-  employee?: {
-    id: string
-    name: string
-    employee_type: string
-    base_salary: number
-    hourly_rate: number
-  }
+  notes?: string | null
 }
 
 interface Props {
@@ -42,117 +47,153 @@ interface Props {
   branchId: string
   branches: { id: string; name: string }[]
   isAdmin: boolean
+  employees: Employee[]
   schedules: Schedule[]
-  accounts: { id: string; code: string; name: string }[]
 }
 
-export default function PayrollVerify({ year, month, branchId, branches, isAdmin, schedules, accounts }: Props) {
+const emptyShifts = () => ({
+  days_d: 0, days_e: 0, days_n: 0, days_a: 0, days_p: 0,
+  days_off: 0, days_sick: 0, days_absent: 0, extra_hours: 0,
+})
+
+export default function PayrollVerify({
+  year, month, branchId, branches, isAdmin, employees, schedules,
+}: Props) {
   const router = useRouter()
-  const [actualPaid, setActualPaid] = useState<Record<string, string>>(
-    Object.fromEntries(schedules.map(s => [s.id, s.actual_paid ? String(s.actual_paid) : '']))
-  )
   const [selectedYear, setSelectedYear] = useState(year)
   const [selectedMonth, setSelectedMonth] = useState(month)
   const [selectedBranch, setSelectedBranch] = useState(branchId)
-  const [saving, setSaving] = useState(false)
-  const [generating, setGenerating] = useState(false)
-  const [saved, setSaved] = useState(false)
+
+  // 班次輸入 modal
+  const [modalEmp, setModalEmp] = useState<Employee | null>(null)
+  const [modalExisting, setModalExisting] = useState<Schedule | null>(null)
+  const [shifts, setShifts] = useState(emptyShifts())
+  const [notes, setNotes] = useState('')
+  const [savingModal, setSavingModal] = useState(false)
+  const [modalError, setModalError] = useState('')
+
+  // 實發輸入
+  const [actualPaid, setActualPaid] = useState<Record<string, string>>(
+    Object.fromEntries(schedules.map(s => [s.id, s.actual_paid ? String(s.actual_paid) : '']))
+  )
+  const [savingActual, setSavingActual] = useState(false)
+  const [savedActual, setSavedActual] = useState(false)
+
+  // scheduleMap: employee_id → schedule
+  const scheduleMap = Object.fromEntries(schedules.map(s => [s.employee_id, s]))
 
   function navigate() {
-    const params = new URLSearchParams({ year: String(selectedYear), month: String(selectedMonth), branch: selectedBranch })
+    const params = new URLSearchParams({
+      year: String(selectedYear),
+      month: String(selectedMonth),
+      branch: selectedBranch,
+    })
     router.push(`/payroll/verify?${params}`)
   }
 
-  async function handleSaveActual() {
-    setSaving(true)
-    const supabase = createClient()
-    const updates = schedules.map(s => ({
-      id: s.id,
-      actual_paid: Number(actualPaid[s.id]) || 0,
-    }))
-    for (const u of updates) {
-      await supabase.from('employee_monthly_schedules').update({ actual_paid: u.actual_paid }).eq('id', u.id)
+  function openModal(emp: Employee) {
+    const existing = scheduleMap[emp.id] ?? null
+    setModalEmp(emp)
+    setModalExisting(existing)
+    setModalError('')
+    if (existing) {
+      setShifts({
+        days_d: existing.days_d,
+        days_e: existing.days_e,
+        days_n: existing.days_n,
+        days_a: existing.days_a,
+        days_p: existing.days_p,
+        days_off: existing.days_off,
+        days_sick: existing.days_sick,
+        days_absent: existing.days_absent,
+        extra_hours: existing.extra_hours,
+      })
+      setNotes(existing.notes ?? '')
+    } else {
+      setShifts(emptyShifts())
+      setNotes('')
     }
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  }
+
+  function closeModal() {
+    setModalEmp(null)
+    setModalExisting(null)
+  }
+
+  // 即時試算（供 modal 顯示）
+  const previewResult = modalEmp
+    ? calcMonthlySalary(
+        {
+          base_salary: modalEmp.base_salary,
+          license_fee: modalEmp.license_fee,
+          labor_insurance: modalEmp.labor_insurance,
+          health_insurance: modalEmp.health_insurance,
+        },
+        { year: selectedYear, month: selectedMonth, ...shifts }
+      )
+    : null
+
+  async function handleSaveSchedule() {
+    if (!modalEmp) return
+    setSavingModal(true)
+    setModalError('')
+    const supabase = createClient()
+
+    const result = calcMonthlySalary(
+      {
+        base_salary: modalEmp.base_salary,
+        license_fee: modalEmp.license_fee,
+        labor_insurance: modalEmp.labor_insurance,
+        health_insurance: modalEmp.health_insurance,
+      },
+      { year: selectedYear, month: selectedMonth, ...shifts }
+    )
+
+    const payload = {
+      branch_id: selectedBranch,
+      employee_id: modalEmp.id,
+      year: selectedYear,
+      month: selectedMonth,
+      ...shifts,
+      monthly_standard_hours: result.monthly_standard_hours,
+      total_work_hours: result.actual_hours,
+      overtime_hours: result.overtime_hours,
+      overtime_pay: result.overtime_pay,
+      gross_salary: result.gross_salary,
+      absence_deduction: result.absence_deduction,
+      calculated_net: result.calculated_net,
+      notes: notes || null,
+    }
+
+    const { error: err } = modalExisting
+      ? await supabase.from('employee_monthly_schedules').update(payload).eq('id', modalExisting.id)
+      : await supabase.from('employee_monthly_schedules').insert(payload)
+
+    setSavingModal(false)
+    if (err) { setModalError('儲存失敗：' + err.message); return }
+    closeModal()
     router.refresh()
   }
 
-  async function handleGenerateVoucher() {
-    const totalNet = schedules.reduce((s, r) => s + r.calculated_net, 0)
-    if (totalNet === 0) { alert('薪資合計為零，無法產生傳票'); return }
-
-    const debitAccount = accounts.find(a => a.code === '6010')
-    const creditAccount = accounts.find(a => a.code === '2140')
-
-    if (!debitAccount || !creditAccount) {
-      alert('找不到薪資科目（6010 或 2140），請先至「科目代號」新增相關科目')
-      return
-    }
-
-    setGenerating(true)
+  async function handleSaveActual() {
+    setSavingActual(true)
     const supabase = createClient()
-
-    const voucherPayload = {
-      branch_id: selectedBranch,
-      date: `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`,
-      description: `${selectedYear}年${selectedMonth}月薪資`,
-    }
-
-    const { data: voucher, error: ve } = await supabase
-      .from('vouchers')
-      .insert(voucherPayload)
-      .select()
-      .single()
-
-    if (ve || !voucher) { alert('產生傳票失敗：' + ve?.message); setGenerating(false); return }
-
-    const lines = [
-      { voucher_id: voucher.id, account_id: debitAccount.id, debit: totalNet, credit: 0, note: `${selectedYear}年${selectedMonth}月薪資支出`, line_order: 1 },
-      { voucher_id: voucher.id, account_id: creditAccount.id, debit: 0, credit: totalNet, note: `${selectedYear}年${selectedMonth}月應付薪資`, line_order: 2 },
-    ]
-
-    const { error: le } = await supabase.from('voucher_lines').insert(lines)
-    if (le) { alert('新增分錄失敗：' + le.message); setGenerating(false); return }
-
-    // 更新所有班表記錄的 voucher_id
     for (const s of schedules) {
-      await supabase.from('employee_monthly_schedules').update({ voucher_id: voucher.id }).eq('id', s.id)
+      const val = Number(actualPaid[s.id]) || 0
+      if (val !== s.actual_paid) {
+        await supabase.from('employee_monthly_schedules').update({ actual_paid: val }).eq('id', s.id)
+      }
     }
-
-    setGenerating(false)
-    alert(`已產生薪資傳票 — 總計 ${formatCurrency(totalNet)}`)
-    router.push(`/vouchers/${voucher.id}`)
+    setSavingActual(false)
+    setSavedActual(true)
+    setTimeout(() => setSavedActual(false), 3000)
+    router.refresh()
   }
 
-  async function handleExport() {
-    const xlsx = await import('xlsx')
-    const data = [
-      ['姓名', '類型', 'D班', 'E班', 'N班', 'A班', 'P班', '病假', '缺勤', '加班時數', '加班費', '夜班津貼', '缺勤扣款', '應發薪資', '實發薪資', '差異'],
-      ...schedules.map(s => {
-        const actual = Number(actualPaid[s.id]) || s.actual_paid || 0
-        const diff = actual - s.calculated_net
-        return [
-          s.employee?.name ?? '',
-          s.employee?.employee_type === 'monthly' ? '月薪' : '時薪',
-          s.days_d, s.days_e, s.days_n, s.days_a, s.days_p,
-          s.days_sick, s.days_absent, s.extra_hours,
-          s.overtime_pay, s.night_allowance, s.absence_deduction,
-          s.calculated_net, actual, diff,
-        ]
-      })
-    ]
-    const ws = xlsx.utils.aoa_to_sheet(data)
-    const wb = xlsx.utils.book_new()
-    xlsx.utils.book_append_sheet(wb, ws, '薪資核對')
-    xlsx.writeFile(wb, `薪資核對_${selectedYear}_${selectedMonth}.xlsx`)
-  }
-
+  const hasSchedule = employees.some(e => scheduleMap[e.id])
   const totalCalculated = schedules.reduce((s, r) => s + r.calculated_net, 0)
   const totalActual = schedules.reduce((s, r) => s + (Number(actualPaid[r.id]) || r.actual_paid || 0), 0)
   const totalDiff = totalActual - totalCalculated
-  const hasVoucher = schedules.some(s => s.voucher_id)
 
   return (
     <div className="space-y-4">
@@ -187,57 +228,47 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
           className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
           載入
         </button>
-        <div className="flex-1" />
-        <button onClick={handleExport}
-          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-          匯出 Excel
-        </button>
       </div>
 
-      {schedules.length === 0 ? (
+      {employees.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
-          此月份尚無班表記錄，請先至「班表上傳」輸入班表
+          此分公司尚無員工，請先至「員工管理」新增員工
         </div>
       ) : (
         <>
-          {/* 摘要卡 */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-xs text-gray-700 mb-1">系統計算應發</div>
-              <div className="text-xl font-bold text-blue-700 font-mono">{formatCurrency(totalCalculated)}</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-xs text-gray-700 mb-1">實際發放合計</div>
-              <div className="text-xl font-bold text-gray-800 font-mono">{formatCurrency(totalActual)}</div>
-            </div>
-            <div className={`border rounded-xl p-4 ${Math.abs(totalDiff) < 10 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="text-xs text-gray-700 mb-1">差異（實發－應發）</div>
-              <div className={`text-xl font-bold font-mono ${Math.abs(totalDiff) < 10 ? 'text-green-700' : 'text-red-600'}`}>
-                {totalDiff >= 0 ? '+' : ''}{formatCurrency(totalDiff)}
+          {/* 摘要卡（有班表資料才顯示） */}
+          {hasSchedule && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-xs text-gray-700 mb-1">系統計算應發合計</div>
+                <div className="text-xl font-bold text-blue-700 font-mono">{formatCurrency(totalCalculated)}</div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-xs text-gray-700 mb-1">實際發放合計</div>
+                <div className="text-xl font-bold text-gray-800 font-mono">{formatCurrency(totalActual)}</div>
+              </div>
+              <div className={`border rounded-xl p-4 ${Math.abs(totalDiff) < 10 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="text-xs text-gray-700 mb-1">差異（實發 − 應發）</div>
+                <div className={`text-xl font-bold font-mono ${Math.abs(totalDiff) < 10 ? 'text-green-700' : 'text-red-600'}`}>
+                  {totalDiff >= 0 ? '+' : ''}{formatCurrency(totalDiff)}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* 明細表 */}
+          {/* 員工核對表 */}
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-              <span className="font-semibold text-gray-800">{selectedYear} 年 {selectedMonth} 月薪資核對</span>
-              <div className="flex items-center gap-3">
-                {saved && <span className="text-green-600 text-sm">✓ 已儲存</span>}
-                <button onClick={handleSaveActual} disabled={saving}
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors">
-                  {saving ? '儲存中...' : '儲存實發金額'}
-                </button>
-                {!hasVoucher && (
-                  <button onClick={handleGenerateVoucher} disabled={generating}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
-                    {generating ? '產生中...' : '一鍵產生薪資傳票'}
+              <span className="font-semibold text-gray-800">{selectedYear} 年 {selectedMonth} 月薪資核對（當月標準工時：{getMonthlyStandard(selectedYear, selectedMonth)}h）</span>
+              {hasSchedule && (
+                <div className="flex items-center gap-3">
+                  {savedActual && <span className="text-green-600 text-sm">✓ 已儲存</span>}
+                  <button onClick={handleSaveActual} disabled={savingActual}
+                    className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors">
+                    {savingActual ? '儲存中...' : '儲存實發金額'}
                   </button>
-                )}
-                {hasVoucher && (
-                  <span className="text-green-600 text-sm font-medium">✓ 已產生傳票</span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="overflow-x-auto">
@@ -251,36 +282,56 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
                     <th className="px-2 py-2.5 text-center text-gray-700 font-medium">A</th>
                     <th className="px-2 py-2.5 text-center text-gray-700 font-medium">P</th>
                     <th className="px-2 py-2.5 text-center text-gray-700 font-medium">缺勤</th>
+                    <th className="px-3 py-2.5 text-right text-gray-700 font-medium">實際工時</th>
                     <th className="px-3 py-2.5 text-right text-gray-700 font-medium">加班費</th>
-                    <th className="px-3 py-2.5 text-right text-gray-700 font-medium">夜班津貼</th>
                     <th className="px-3 py-2.5 text-right text-gray-700 font-medium">扣款</th>
                     <th className="px-3 py-2.5 text-right text-gray-700 font-medium bg-blue-50">應發</th>
                     <th className="px-3 py-2.5 text-right text-gray-700 font-medium">實發</th>
                     <th className="px-3 py-2.5 text-center text-gray-700 font-medium">差異</th>
+                    <th className="px-3 py-2.5 text-center text-gray-700 font-medium">班次</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {schedules.map(s => {
+                  {employees.map(emp => {
+                    const s = scheduleMap[emp.id]
+                    if (!s) {
+                      return (
+                        <tr key={emp.id} className="border-b border-gray-100 bg-gray-50">
+                          <td className="px-4 py-2.5 font-medium text-gray-700">{emp.name}</td>
+                          <td colSpan={12} className="px-4 py-2.5 text-gray-500 text-xs">尚未輸入班表</td>
+                          <td className="px-3 py-2.5 text-center">
+                            <button onClick={() => openModal(emp)}
+                              className="text-blue-600 hover:text-blue-800 text-xs font-medium">輸入班次</button>
+                          </td>
+                        </tr>
+                      )
+                    }
                     const actual = Number(actualPaid[s.id]) || s.actual_paid || 0
                     const diff = actual - s.calculated_net
                     const match = actual > 0 && Math.abs(diff) < 10
                     const mismatch = actual > 0 && Math.abs(diff) >= 10
                     return (
-                      <tr key={s.id} className={`border-b border-gray-100 ${mismatch ? 'bg-red-50' : ''}`}>
-                        <td className="px-4 py-2.5 font-medium text-gray-900">{s.employee?.name}</td>
+                      <tr key={emp.id} className={`border-b border-gray-100 ${mismatch ? 'bg-red-50' : ''}`}>
+                        <td className="px-4 py-2.5 font-medium text-gray-900">{emp.name}</td>
                         <td className="px-2 py-2.5 text-center text-gray-700">{s.days_d || '-'}</td>
                         <td className="px-2 py-2.5 text-center text-gray-700">{s.days_e || '-'}</td>
                         <td className="px-2 py-2.5 text-center text-gray-700">{s.days_n || '-'}</td>
                         <td className="px-2 py-2.5 text-center text-gray-700">{s.days_a || '-'}</td>
                         <td className="px-2 py-2.5 text-center text-gray-700">{s.days_p || '-'}</td>
                         <td className="px-2 py-2.5 text-center text-red-600">{s.days_absent || '-'}</td>
-                        <td className="px-3 py-2.5 text-right font-mono text-gray-700">{s.overtime_pay > 0 ? formatCurrency(s.overtime_pay) : '-'}</td>
-                        <td className="px-3 py-2.5 text-right font-mono text-gray-700">{s.night_allowance > 0 ? formatCurrency(s.night_allowance) : '-'}</td>
-                        <td className="px-3 py-2.5 text-right font-mono text-red-600">{s.absence_deduction > 0 ? `−${formatCurrency(s.absence_deduction)}` : '-'}</td>
-                        <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-800 bg-blue-50">{formatCurrency(s.calculated_net)}</td>
+                        <td className="px-3 py-2.5 text-right font-mono text-gray-700">{s.total_work_hours}h</td>
+                        <td className="px-3 py-2.5 text-right font-mono text-gray-700">
+                          {s.overtime_pay > 0 ? formatCurrency(s.overtime_pay) : '-'}
+                        </td>
+                        <td className="px-3 py-2.5 text-right font-mono text-red-600">
+                          {s.absence_deduction > 0 ? `−${formatCurrency(s.absence_deduction)}` : '-'}
+                        </td>
+                        <td className="px-3 py-2.5 text-right font-mono font-semibold text-blue-800 bg-blue-50">
+                          {formatCurrency(s.calculated_net)}
+                        </td>
                         <td className="px-3 py-2.5 text-right">
                           <input type="number"
-                            value={actualPaid[s.id]}
+                            value={actualPaid[s.id] ?? ''}
                             onChange={e => setActualPaid(p => ({ ...p, [s.id]: e.target.value }))}
                             placeholder="輸入實發"
                             className="w-28 border border-gray-300 rounded px-2 py-1 text-right text-sm text-gray-900 font-mono" />
@@ -291,8 +342,14 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
                           ) : match ? (
                             <span className="text-green-600 text-xs font-medium">✓ 相符</span>
                           ) : (
-                            <span className="text-red-600 text-xs font-medium">{diff > 0 ? '+' : ''}{formatCurrency(diff)}</span>
+                            <span className="text-red-600 text-xs font-medium">
+                              {diff > 0 ? '+' : ''}{formatCurrency(diff)}
+                            </span>
                           )}
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <button onClick={() => openModal(emp)}
+                            className="text-gray-500 hover:text-blue-600 text-xs">編輯</button>
                         </td>
                       </tr>
                     )
@@ -302,6 +359,94 @@ export default function PayrollVerify({ year, month, branchId, branches, isAdmin
             </div>
           </div>
         </>
+      )}
+
+      {/* 班次輸入 Modal */}
+      {modalEmp && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="font-semibold text-gray-800">
+                {modalEmp.name} — {selectedYear}/{selectedMonth} 班次輸入
+              </h2>
+              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-lg">✕</button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              {/* 班次輸入 */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { key: 'days_d', label: 'D 班（8h）' },
+                  { key: 'days_e', label: 'E 班（8h）' },
+                  { key: 'days_n', label: 'N 班（11h）' },
+                  { key: 'days_a', label: 'A 班（12h）' },
+                  { key: 'days_p', label: 'P 班（12h）' },
+                  { key: 'days_off', label: '休假天數' },
+                  { key: 'days_sick', label: '病假天數' },
+                  { key: 'days_absent', label: '曠職天數' },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={shifts[key as keyof typeof shifts]}
+                      onChange={e => setShifts(s => ({ ...s, [key]: Number(e.target.value) || 0 }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 text-center"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">備註</label>
+                <input type="text" value={notes} onChange={e => setNotes(e.target.value)}
+                  placeholder="選填"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
+              </div>
+
+              {/* 即時試算 */}
+              {previewResult && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm space-y-1.5">
+                  <div className="font-semibold text-blue-800 mb-2">薪資試算（即時）</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-gray-700">
+                    <span>實際工時：</span>
+                    <span className="font-mono text-right">{previewResult.actual_hours}h（標準 {previewResult.monthly_standard_hours}h）</span>
+                    <span>加班時數：</span>
+                    <span className="font-mono text-right">{previewResult.overtime_hours}h</span>
+                    <span>加班費：</span>
+                    <span className="font-mono text-right">{formatCurrency(previewResult.overtime_pay)}</span>
+                    <span>証照費：</span>
+                    <span className="font-mono text-right">{formatCurrency(modalEmp.license_fee)}</span>
+                    <span>缺勤扣款：</span>
+                    <span className="font-mono text-right text-red-600">−{formatCurrency(previewResult.absence_deduction)}</span>
+                    <span>勞健保扣款：</span>
+                    <span className="font-mono text-right text-red-600">−{formatCurrency(modalEmp.labor_insurance + modalEmp.health_insurance)}</span>
+                  </div>
+                  <div className="border-t border-blue-300 pt-2 mt-1 flex justify-between font-semibold text-blue-900">
+                    <span>應發薪資：</span>
+                    <span className="font-mono text-lg">{formatCurrency(previewResult.calculated_net)}</span>
+                  </div>
+                </div>
+              )}
+
+              {modalError && (
+                <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">{modalError}</p>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+              <button onClick={handleSaveSchedule} disabled={savingModal}
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {savingModal ? '儲存中...' : '儲存班次'}
+              </button>
+              <button onClick={closeModal}
+                className="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { calcMonthlySalary, calcHourlySalary, SHIFT_HOURS } from '@/lib/payroll'
+// 班表上傳功能本次暫不實作，由薪資核對頁直接輸入班次
 import { formatCurrency } from '@/lib/utils'
 
 interface Employee {
@@ -90,19 +90,9 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
       days_a: row.days_a, days_p: row.days_p, days_absent: row.days_absent,
       extra_hours: row.extra_hours,
     }
-    const result = emp.employee_type === 'monthly'
-      ? calcMonthlySalary(emp.base_salary, emp.night_shift_allowance, emp.labor_insurance, emp.health_insurance, schedule)
-      : calcHourlySalary(emp.hourly_rate, schedule)
-
-    return {
-      ...row,
-      total_work_hours: result.totalWorkHours,
-      overtime_pay: result.overtimePay,
-      night_allowance: result.nightAllowance,
-      gross_salary: result.gross,
-      absence_deduction: result.absenceDeduction,
-      calculated_net: result.net,
-    }
+    // TODO: 班表上傳功能待實作，計算邏輯已移至 lib/payroll.ts
+    void emp; void schedule
+    return row
   }
 
   function updateRow(idx: number, field: keyof ScheduleRow, value: number) {

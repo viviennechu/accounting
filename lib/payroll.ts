@@ -1,100 +1,78 @@
-// 班別工時定義
-export const SHIFT_HOURS: Record<string, number> = { D: 8, E: 8, N: 11, A: 12, P: 12 }
-export const SHIFT_NIGHT: Record<string, boolean> = { D: false, E: false, N: true, A: false, P: true }
+// 115年（2026年）台灣行事曆各月標準工時
+const MONTHLY_STANDARDS: Record<number, Record<number, number>> = {
+  2026: {
+    1: 168, 2: 112, 3: 176, 4: 160, 5: 160, 6: 168,
+    7: 184, 8: 168, 9: 160, 10: 160, 11: 168, 12: 176,
+  },
+}
 
-export interface ScheduleInput {
+export function getMonthlyStandard(year: number, month: number): number {
+  return MONTHLY_STANDARDS[year]?.[month] ?? 176
+}
+
+export interface PayrollInput {
+  year: number
+  month: number
   days_d: number
   days_e: number
   days_n: number
   days_a: number
   days_p: number
   days_absent: number
-  extra_hours: number
 }
 
-export interface SalaryCalcResult {
-  totalWorkHours: number
-  overtimePay: number
-  nightAllowance: number
-  absenceDeduction: number
-  gross: number
-  net: number
-}
-
-function calcOvertimePayForShift(hourlyRate: number, totalHours: number): number {
-  const ot1 = Math.min(Math.max(totalHours - 8, 0), 2)  // 8-10h: ×1.34
-  const ot2 = Math.min(Math.max(totalHours - 10, 0), 2) // 10-12h: ×1.67
-  return Math.round(ot1 * hourlyRate * 1.34 + ot2 * hourlyRate * 1.67)
+export interface PayrollResult {
+  actual_hours: number
+  monthly_standard_hours: number
+  overtime_hours: number
+  overtime_pay: number
+  absence_deduction: number
+  gross_salary: number
+  calculated_net: number
 }
 
 export function calcMonthlySalary(
-  baseSalary: number,
-  nightShiftAllowance: number,
-  laborInsurance: number,
-  healthInsurance: number,
-  schedule: ScheduleInput
-): SalaryCalcResult {
-  const hr = baseSalary / 240
+  employee: {
+    base_salary: number
+    license_fee: number
+    labor_insurance: number
+    health_insurance: number
+  },
+  schedule: PayrollInput
+): PayrollResult {
+  const { base_salary, license_fee, labor_insurance, health_insurance } = employee
+  const { year, month, days_d, days_e, days_n, days_a, days_p, days_absent } = schedule
 
-  const shifts: Array<{ key: keyof ScheduleInput; shift: string }> = [
-    { key: 'days_d', shift: 'D' },
-    { key: 'days_e', shift: 'E' },
-    { key: 'days_n', shift: 'N' },
-    { key: 'days_a', shift: 'A' },
-    { key: 'days_p', shift: 'P' },
-  ]
+  // Step 1: 月實際工時
+  const actual_hours = days_d * 8 + days_e * 8 + days_n * 11 + days_a * 12 + days_p * 12
 
-  let overtimePay = 0
-  let totalWorkHours = 0
-  let nightDays = 0
+  // Step 2: 當月標準工時
+  const monthly_standard_hours = getMonthlyStandard(year, month)
 
-  for (const { key, shift } of shifts) {
-    const count = schedule[key] as number
-    const hours = SHIFT_HOURS[shift]
-    overtimePay += count * calcOvertimePayForShift(hr, hours)
-    totalWorkHours += count * hours
-    if (SHIFT_NIGHT[shift]) nightDays += count
-  }
+  // Step 3: 加班時數（月總時數超過標準才算）
+  const overtime_hours = Math.max(0, actual_hours - monthly_standard_hours)
 
-  // 額外加班（平日時數 ×1.34）
-  overtimePay += Math.round(schedule.extra_hours * hr * 1.34)
-  totalWorkHours += schedule.extra_hours
+  // Step 4: 加班費（1.34× 池 = 各延長班每班最多 2h，超出用 1.67×）
+  const ot1_pool = days_n * 2 + days_a * 2 + days_p * 2
+  const ot1_hours = Math.min(overtime_hours, ot1_pool)
+  const ot2_hours = Math.max(0, overtime_hours - ot1_hours)
+  const hr = base_salary / 240
+  const overtime_pay = Math.round(ot1_hours * hr * 1.34 + ot2_hours * hr * 1.67)
 
-  const nightAllowance = nightDays * nightShiftAllowance
-  const absenceDeduction = Math.round(baseSalary / 30) * schedule.days_absent
-  const gross = baseSalary + overtimePay + nightAllowance
-  const net = gross - absenceDeduction - laborInsurance - healthInsurance
+  // Step 5: 缺勤扣款
+  const absence_deduction = Math.round(base_salary / 30) * days_absent
+
+  // Step 6: 應發與實發
+  const gross_salary = base_salary + license_fee + overtime_pay
+  const calculated_net = gross_salary - absence_deduction - labor_insurance - health_insurance
 
   return {
-    totalWorkHours,
-    overtimePay: Math.round(overtimePay),
-    nightAllowance: Math.round(nightAllowance),
-    absenceDeduction: Math.round(absenceDeduction),
-    gross: Math.round(gross),
-    net: Math.round(net),
-  }
-}
-
-export function calcHourlySalary(
-  hourlyRate: number,
-  schedule: ScheduleInput
-): SalaryCalcResult {
-  const totalWorkHours =
-    schedule.days_d * 8 +
-    schedule.days_e * 8 +
-    schedule.days_n * 11 +
-    schedule.days_a * 12 +
-    schedule.days_p * 12 +
-    schedule.extra_hours
-
-  const net = Math.round(totalWorkHours * hourlyRate)
-
-  return {
-    totalWorkHours,
-    overtimePay: 0,
-    nightAllowance: 0,
-    absenceDeduction: 0,
-    gross: net,
-    net,
+    actual_hours,
+    monthly_standard_hours,
+    overtime_hours,
+    overtime_pay,
+    absence_deduction,
+    gross_salary,
+    calculated_net,
   }
 }

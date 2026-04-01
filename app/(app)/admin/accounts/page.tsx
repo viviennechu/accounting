@@ -19,6 +19,18 @@ export default async function AccountsPage({
   if (profile?.role === 'viewer') redirect('/dashboard')
 
   const isAdmin = profile?.role === 'admin'
+
+  // admin 沒帶 branch 參數時，自動跳到第一間分公司
+  if (isAdmin && !params.branch) {
+    const { data: firstBranch } = await supabase
+      .from('branches')
+      .select('id')
+      .order('name')
+      .limit(1)
+      .single()
+    if (firstBranch) redirect(`/admin/accounts?branch=${firstBranch.id}`)
+  }
+
   const branchId = params.branch || (!isAdmin ? profile?.branch_id : null)
 
   const { data: branches } = await supabase.from('branches').select('id, name')

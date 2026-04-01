@@ -16,7 +16,7 @@ export default function SimpleVoucherForm({ accounts, branches, defaultBranchId,
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const [branchId, setBranchId] = useState(defaultBranchId)
+  const [branchId, setBranchId] = useState(defaultBranchId || branches[0]?.id || '')
   const [type, setType] = useState<'expense' | 'income'>('expense')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [voucherNo, setVoucherNo] = useState('')

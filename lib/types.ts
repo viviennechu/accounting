@@ -127,10 +127,8 @@ export interface Employee {
   branch_id: string
   name: string
   title?: string | null
-  employee_type: 'monthly' | 'hourly'
   base_salary: number
-  hourly_rate: number
-  night_shift_allowance: number
+  license_fee: number
   labor_insurance: number
   health_insurance: number
   is_active: boolean
@@ -154,14 +152,14 @@ export interface EmployeeMonthlySchedule {
   days_sick: number
   days_absent: number
   extra_hours: number
+  monthly_standard_hours: number
   total_work_hours: number
+  overtime_hours: number
   overtime_pay: number
-  night_allowance: number
   gross_salary: number
   absence_deduction: number
   calculated_net: number
   actual_paid: number
-  voucher_id?: string | null
   notes?: string | null
   employee?: Employee
 }
