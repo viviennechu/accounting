@@ -29,10 +29,9 @@ export default async function ResidentsPage() {
   const active = residents?.filter(r => r.is_active) || []
   const inactive = residents?.filter(r => !r.is_active) || []
 
-  const subsidyLabel = (type: string) => ({
-    self: '自費',
-    subsidy: '社會局補助',
-    both: '自費＋補助',
+  const residentTypeLabel = (type: string) => ({
+    monthly_fee: '月費住民',
+    social_welfare: '社會局住民',
   }[type] || type)
 
   return (
@@ -70,23 +69,32 @@ export default async function ResidentsPage() {
                 <th>姓名</th>
                 {isAdmin && <th>分公司</th>}
                 <th>入住日期</th>
-                <th>費用類型</th>
-                <th className="w-28">月自付額</th>
-                <th className="w-28">月補助金</th>
+                <th>計費類型</th>
+                <th className="w-28">月費金額</th>
                 <th className="w-20">操作</th>
               </tr>
             </thead>
             <tbody>
               {active.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-600 py-8">尚無在籍住民</td></tr>
+                <tr><td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-600 py-8">尚無在籍住民</td></tr>
               ) : active.map(r => (
                 <tr key={r.id}>
                   <td className="font-medium text-gray-900">{r.name}</td>
                   {isAdmin && <td className="text-sm text-gray-600">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
                   <td className="text-sm text-gray-700">{r.admission_date}</td>
-                  <td><span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{subsidyLabel(r.subsidy_type)}</span></td>
-                  <td className="font-mono text-gray-900">{r.monthly_self_pay > 0 ? formatCurrency(r.monthly_self_pay) : '-'}</td>
-                  <td className="font-mono text-gray-900">{r.monthly_subsidy > 0 ? formatCurrency(r.monthly_subsidy) : '-'}</td>
+                  <td>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      r.resident_type === 'social_welfare'
+                        ? 'bg-purple-50 text-purple-700'
+                        : 'bg-blue-50 text-blue-700'
+                    }`}>{residentTypeLabel(r.resident_type)}</span>
+                  </td>
+                  <td className="font-mono text-gray-900">
+                    {r.resident_type === 'monthly_fee'
+                      ? (r.monthly_fee ? formatCurrency(r.monthly_fee) : '-')
+                      : (r.welfare_amount ? formatCurrency(r.welfare_amount) : '-')
+                    }
+                  </td>
                   <td className="text-center">
                     <ResidentActions residentId={r.id} residentName={r.name} />
                   </td>
@@ -121,7 +129,7 @@ export default async function ResidentsPage() {
                     {isAdmin && <td className="text-sm text-gray-600">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
                     <td className="text-sm">{r.admission_date}</td>
                     <td className="text-sm">{r.discharge_date}</td>
-                    <td><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{subsidyLabel(r.subsidy_type)}</span></td>
+                    <td><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{residentTypeLabel(r.resident_type)}</span></td>
                   </tr>
                 ))}
               </tbody>

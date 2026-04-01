@@ -14,40 +14,47 @@ interface Props {
 interface ResidentRow {
   name: string
   admission_date: string
-  subsidy_type: string
-  monthly_self_pay: number
-  monthly_subsidy: number
+  resident_type: 'monthly_fee' | 'social_welfare'
+  monthly_fee: number
+  welfare_amount: number
+  welfare_type: string
+  welfare_doc_no: string
+  nhi_identity: string
   notes: string
   error?: string
 }
 
-const SUBSIDY_MAP: Record<string, string> = {
-  '自費': 'self',
-  '社會局補助': 'subsidy',
-  '補助': 'subsidy',
-  '自費＋補助': 'both',
-  '自費+補助': 'both',
-  'self': 'self',
-  'subsidy': 'subsidy',
-  'both': 'both',
+const RESIDENT_TYPE_MAP: Record<string, 'monthly_fee' | 'social_welfare'> = {
+  '月費': 'monthly_fee',
+  '月費住民': 'monthly_fee',
+  'monthly_fee': 'monthly_fee',
+  '社會局': 'social_welfare',
+  '社會局住民': 'social_welfare',
+  '社會局補助': 'social_welfare',
+  'social_welfare': 'social_welfare',
+}
+
+const WELFARE_TYPE_MAP: Record<string, string> = {
+  '身障': 'disability',
+  '身障保護安置': 'disability',
+  'disability': 'disability',
+  '街友': 'homeless',
+  '街友救助科': 'homeless',
+  'homeless': 'homeless',
 }
 
 function parseDate(val: any): string {
   if (!val) return ''
-  // Excel 日期數字
   if (typeof val === 'number') {
     const d = XLSX.SSF.parse_date_code(val)
     if (d) return `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`
   }
-  // 字串：支援 2024/01/01、2024-01-01、民國113/01/01
   const str = String(val).trim()
-  // 民國年
   const roc = str.match(/^(\d{2,3})[\/\-](\d{1,2})[\/\-](\d{1,2})$/)
   if (roc && Number(roc[1]) < 200) {
     const y = Number(roc[1]) + 1911
     return `${y}-${roc[2].padStart(2, '0')}-${roc[3].padStart(2, '0')}`
   }
-  // 西元
   const iso = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/)
   if (iso) return `${iso[1]}-${iso[2].padStart(2, '0')}-${iso[3].padStart(2, '0')}`
   return str
@@ -65,15 +72,28 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
 
   function downloadTemplate() {
     const ws = XLSX.utils.aoa_to_sheet([
-      ['姓名', '入住日期', '費用類型', '每月自付額', '每月補助金額', '備註'],
-      ['王小明', '2024/01/15', '自費', 8000, 0, ''],
-      ['李小花', '2023/06/01', '自費＋補助', 3000, 5000, '低收入戶'],
-      ['張大同', '2024/03/20', '社會局補助', 0, 8000, ''],
+      ['姓名', '入住日期', '計費類型', '健保身份', '月費金額', '社會局核定月費', '補助類型', '公文字號', '備註'],
+      ['王小明', '2024/01/15', '月費', '低收', 9000, '', '', '', ''],
+      ['李小花', '2023/06/01', '月費', '健保', 10950, '', '', '', ''],
+      ['張大同', '2024/03/20', '社會局', '健保', '', 25000, '身障保護安置', '新北社助字第1140756071號', ''],
     ])
-    ws['!cols'] = [{ wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 20 }]
+    ws['!cols'] = [
+      { wch: 10 }, { wch: 14 }, { wch: 12 }, { wch: 8 },
+      { wch: 12 }, { wch: 14 }, { wch: 16 }, { wch: 28 }, { wch: 20 },
+    ]
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '住民資料')
     XLSX.writeFile(wb, '住民匯入範本.xlsx')
+  }
+
+  function validateRow(r: ResidentRow): string {
+    if (!r.name) return '姓名不能為空'
+    if (!r.admission_date || !/^\d{4}-\d{2}-\d{2}$/.test(r.admission_date)) return '日期格式錯誤'
+    if (!r.nhi_identity) return '健保身份不能為空'
+    if (r.resident_type === 'monthly_fee' && r.monthly_fee <= 0) return '月費住民需填寫月費金額'
+    if (r.resident_type === 'social_welfare' && r.welfare_amount <= 0) return '社會局住民需填寫核定月費'
+    if (r.resident_type === 'social_welfare' && !r.welfare_type) return '社會局住民需填寫補助類型'
+    return ''
   }
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -90,23 +110,27 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
       const ws = wb.Sheets[wb.SheetNames[0]]
       const raw: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
 
-      // 略過標題行
       const dataRows = raw.slice(1).filter(r => r.some(c => String(c).trim()))
 
       const parsed: ResidentRow[] = dataRows.map((r) => {
         const name = String(r[0] || '').trim()
         const admission_date = parseDate(r[1])
-        const subsidyRaw = String(r[2] || '').trim()
-        const subsidy_type = SUBSIDY_MAP[subsidyRaw] || 'self'
-        const monthly_self_pay = Number(r[3]) || 0
-        const monthly_subsidy = Number(r[4]) || 0
-        const notes = String(r[5] || '').trim()
+        const residentTypeRaw = String(r[2] || '').trim()
+        const resident_type = RESIDENT_TYPE_MAP[residentTypeRaw] || 'monthly_fee'
+        const nhi_identity = String(r[3] || '').trim()
+        const monthly_fee = Number(r[4]) || 0
+        const welfare_amount = Number(r[5]) || 0
+        const welfareTypeRaw = String(r[6] || '').trim()
+        const welfare_type = WELFARE_TYPE_MAP[welfareTypeRaw] || welfareTypeRaw
+        const welfare_doc_no = String(r[7] || '').trim()
+        const notes = String(r[8] || '').trim()
 
-        let error = ''
-        if (!name) error = '姓名不能為空'
-        else if (!admission_date || !/^\d{4}-\d{2}-\d{2}$/.test(admission_date)) error = '日期格式錯誤'
-
-        return { name, admission_date, subsidy_type, monthly_self_pay, monthly_subsidy, notes, error }
+        const row: ResidentRow = {
+          name, admission_date, resident_type, nhi_identity,
+          monthly_fee, welfare_amount, welfare_type, welfare_doc_no, notes,
+        }
+        row.error = validateRow(row)
+        return row
       })
 
       setRows(parsed)
@@ -117,11 +141,7 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
   function updateRow(idx: number, field: keyof ResidentRow, value: string | number) {
     const updated = [...rows]
     updated[idx] = { ...updated[idx], [field]: value }
-    // 重新驗證
-    const r = updated[idx]
-    if (!r.name) updated[idx].error = '姓名不能為空'
-    else if (!r.admission_date || !/^\d{4}-\d{2}-\d{2}$/.test(r.admission_date)) updated[idx].error = '日期格式錯誤'
-    else updated[idx].error = ''
+    updated[idx].error = validateRow(updated[idx])
     setRows(updated)
   }
 
@@ -139,9 +159,12 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
       branch_id: branchId,
       name: r.name,
       admission_date: r.admission_date,
-      subsidy_type: r.subsidy_type,
-      monthly_self_pay: r.monthly_self_pay,
-      monthly_subsidy: r.monthly_subsidy,
+      resident_type: r.resident_type,
+      monthly_fee: r.resident_type === 'monthly_fee' ? r.monthly_fee : null,
+      welfare_amount: r.resident_type === 'social_welfare' ? r.welfare_amount : null,
+      welfare_type: r.resident_type === 'social_welfare' ? r.welfare_type || null : null,
+      welfare_doc_no: r.resident_type === 'social_welfare' ? r.welfare_doc_no || null : null,
+      nhi_identity: r.nhi_identity || null,
       notes: r.notes || null,
       is_active: true,
     }))
@@ -160,8 +183,6 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
   const validCount = rows.filter(r => !r.error).length
   const errorCount = rows.filter(r => r.error).length
 
-  const subsidyLabel = (type: string) => ({ self: '自費', subsidy: '社會局補助', both: '自費＋補助' }[type] || type)
-
   return (
     <div className="space-y-5">
       {/* 步驟說明 */}
@@ -169,10 +190,10 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
         <h2 className="font-semibold text-blue-800 mb-2">操作步驟</h2>
         <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
           <li>下載範本，依格式填寫住民資料</li>
-          <li>費用類型填：自費 / 社會局補助 / 自費＋補助</li>
+          <li>計費類型填：月費 / 社會局</li>
+          <li>健保身份填：健保 / 低收 / 中低收</li>
           <li>日期支援西元（2024/01/01）或民國（113/01/01）格式</li>
-          <li>上傳後確認預覽，可直接修改錯誤</li>
-          <li>確認無誤後按「全部存入」</li>
+          <li>上傳後確認預覽，可直接修改錯誤後再存入</li>
         </ol>
         <button
           onClick={downloadTemplate}
@@ -251,9 +272,9 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
                   <th className="px-3 py-2 text-left text-gray-700 font-medium w-8">#</th>
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">姓名</th>
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">入住日期</th>
-                  <th className="px-3 py-2 text-left text-gray-700 font-medium">費用類型</th>
-                  <th className="px-3 py-2 text-right text-gray-700 font-medium">每月自付額</th>
-                  <th className="px-3 py-2 text-right text-gray-700 font-medium">每月補助</th>
+                  <th className="px-3 py-2 text-left text-gray-700 font-medium">計費類型</th>
+                  <th className="px-3 py-2 text-left text-gray-700 font-medium">健保身份</th>
+                  <th className="px-3 py-2 text-right text-gray-700 font-medium">月費金額</th>
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">備註</th>
                   <th className="px-3 py-2 w-8"></th>
                 </tr>
@@ -280,32 +301,41 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
                     </td>
                     <td className="px-3 py-2">
                       <select
-                        value={row.subsidy_type}
-                        onChange={e => updateRow(idx, 'subsidy_type', e.target.value)}
+                        value={row.resident_type}
+                        onChange={e => updateRow(idx, 'resident_type', e.target.value)}
                         className="border border-gray-300 rounded px-2 py-1 text-sm text-gray-900"
                       >
-                        <option value="self">自費</option>
-                        <option value="subsidy">社會局補助</option>
-                        <option value="both">自費＋補助</option>
+                        <option value="monthly_fee">月費</option>
+                        <option value="social_welfare">社會局</option>
                       </select>
                     </td>
                     <td className="px-3 py-2">
                       <input
-                        type="number"
-                        value={row.monthly_self_pay || ''}
-                        onChange={e => updateRow(idx, 'monthly_self_pay', Number(e.target.value))}
-                        className="w-24 border border-gray-300 rounded px-2 py-1 text-sm text-gray-900 text-right"
-                        min="0"
+                        type="text"
+                        value={row.nhi_identity}
+                        onChange={e => updateRow(idx, 'nhi_identity', e.target.value)}
+                        className="w-20 border border-gray-300 rounded px-2 py-1 text-sm text-gray-900"
+                        placeholder="健保"
                       />
                     </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        value={row.monthly_subsidy || ''}
-                        onChange={e => updateRow(idx, 'monthly_subsidy', Number(e.target.value))}
-                        className="w-24 border border-gray-300 rounded px-2 py-1 text-sm text-gray-900 text-right"
-                        min="0"
-                      />
+                    <td className="px-3 py-2 text-right">
+                      {row.resident_type === 'monthly_fee' ? (
+                        <input
+                          type="number"
+                          value={row.monthly_fee || ''}
+                          onChange={e => updateRow(idx, 'monthly_fee', Number(e.target.value))}
+                          className="w-24 border border-gray-300 rounded px-2 py-1 text-sm text-gray-900 text-right"
+                          min="1"
+                        />
+                      ) : (
+                        <input
+                          type="number"
+                          value={row.welfare_amount || ''}
+                          onChange={e => updateRow(idx, 'welfare_amount', Number(e.target.value))}
+                          className="w-24 border border-gray-300 rounded px-2 py-1 text-sm text-gray-900 text-right"
+                          min="1"
+                        />
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <input

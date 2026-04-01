@@ -70,9 +70,12 @@ export interface Resident {
   name: string
   admission_date: string
   discharge_date?: string | null
-  subsidy_type: 'self' | 'subsidy' | 'both'
-  monthly_self_pay: number
-  monthly_subsidy: number
+  resident_type: 'monthly_fee' | 'social_welfare'
+  monthly_fee: number | null
+  welfare_amount: number | null
+  welfare_type: 'disability' | 'homeless' | null
+  welfare_doc_no: string | null
+  nhi_identity: string | null
   notes?: string | null
   is_active: boolean
   created_at: string

@@ -94,27 +94,28 @@ export default async function ResidentFeesPage({
                 <tr><td colSpan={7} className="text-center text-gray-600 py-8">本月尚無在籍住民</td></tr>
               ) : residents.map(r => {
                 const fee = feeMap[r.id]
-                const subsidyLabel = ({ self: '自費', subsidy: '補助', both: '自費＋補助' } as any)[r.subsidy_type]
+                const typeLabel = r.resident_type === 'social_welfare' ? '社會局' : '月費'
+                const residentMonthlyAmount = r.resident_type === 'monthly_fee' ? r.monthly_fee : r.welfare_amount
                 return (
                   <tr key={r.id}>
                     <td className="font-medium text-gray-900">{r.name}</td>
-                    <td><span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{subsidyLabel}</span></td>
+                    <td><span className={`text-xs px-2 py-0.5 rounded-full ${r.resident_type === 'social_welfare' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>{typeLabel}</span></td>
                     <td className="font-mono text-gray-900">{fee?.nhi_points ? fee.nhi_points.toLocaleString('zh-TW') : '-'}</td>
                     <td className="font-mono text-gray-900">{fee?.nhi_amount ? formatCurrency(fee.nhi_amount) : '-'}</td>
-                    <td className="font-mono text-gray-900">{fee?.self_pay ? formatCurrency(fee.self_pay) : (r.monthly_self_pay > 0 ? formatCurrency(r.monthly_self_pay) : '-')}</td>
-                    <td className="font-mono text-gray-900">{fee?.subsidy_amount ? formatCurrency(fee.subsidy_amount) : (r.monthly_subsidy > 0 ? formatCurrency(r.monthly_subsidy) : '-')}</td>
+                    <td className="font-mono text-gray-900">{fee?.self_pay ? formatCurrency(fee.self_pay) : (residentMonthlyAmount ? formatCurrency(residentMonthlyAmount) : '-')}</td>
+                    <td className="font-mono text-gray-900">{fee?.subsidy_amount ? formatCurrency(fee.subsidy_amount) : '-'}</td>
                     <td className="text-center">
                       {fee?.self_pay_paid_at ? (
                         <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
                           已收 {fee.self_pay_paid_at}
                         </span>
-                      ) : r.monthly_self_pay > 0 ? (
+                      ) : residentMonthlyAmount ? (
                         <MarkPaidButton
                           residentId={r.id}
                           branchId={r.branch_id}
                           year={year}
                           month={month}
-                          selfPay={fee?.self_pay || r.monthly_self_pay}
+                          selfPay={fee?.self_pay || residentMonthlyAmount}
                           feeId={fee?.id}
                         />
                       ) : (
