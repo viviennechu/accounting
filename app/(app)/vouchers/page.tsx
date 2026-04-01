@@ -48,6 +48,7 @@ export default async function VouchersPage({
   // 診斷用
   const { data: roleData } = await supabase.rpc('get_my_role')
   const { data: allVouchers } = await supabase.from('vouchers').select('id, date').limit(5)
+  console.log('DIAG endDate:', endDate, 'role:', roleData, 'allVouchers:', allVouchers?.length, 'voucherCount:', vouchers?.length, 'error:', voucherError?.message)
 
   // 取得分公司清單（admin 用）
   const { data: branches } = await supabase.from('branches').select('id, name')
