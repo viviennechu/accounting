@@ -45,6 +45,10 @@ export default async function VouchersPage({
 
   const { data: vouchers, error: voucherError } = await query
 
+  // 診斷用
+  const { data: roleData } = await supabase.rpc('get_my_role')
+  const { data: allVouchers } = await supabase.from('vouchers').select('id, date').limit(5)
+
   // 取得分公司清單（admin 用）
   const { data: branches } = await supabase.from('branches').select('id, name')
 
@@ -72,11 +76,9 @@ export default async function VouchersPage({
         showBranch={isAdmin}
       />
 
-      {voucherError && (
-        <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-4 text-red-700 text-sm">
-          查詢錯誤：{voucherError.message} | endDate: {endDate}
-        </div>
-      )}
+      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4 text-xs font-mono">
+        role: {roleData ?? 'null'} | endDate: {endDate} | vouchers: {vouchers?.length ?? 'null'} | allVouchers: {allVouchers?.length ?? 'null'} | error: {voucherError?.message ?? 'none'}
+      </div>
 
       {/* 傳票清單 */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
