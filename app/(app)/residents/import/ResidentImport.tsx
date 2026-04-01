@@ -63,7 +63,7 @@ function parseDate(val: any): string {
 export default function ResidentImport({ branches, defaultBranchId, isAdmin }: Props) {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [branchId, setBranchId] = useState(defaultBranchId)
+  const [branchId, setBranchId] = useState(defaultBranchId || branches[0]?.id || '')
   const [rows, setRows] = useState<ResidentRow[]>([])
   const [fileName, setFileName] = useState('')
   const [saving, setSaving] = useState(false)
