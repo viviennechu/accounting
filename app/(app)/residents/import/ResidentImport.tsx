@@ -149,6 +149,29 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
     setRows(rows.filter((_, i) => i !== idx))
   }
 
+  function exportErrors() {
+    const errorRows = rows.filter(r => r.error)
+    const data = [
+      ['姓名', '入住日期', '計費類型', '健保身份', '月費金額', '社會局核定月費', '補助類型', '公文字號', '備註', '錯誤原因'],
+      ...errorRows.map(r => [
+        r.name, r.admission_date,
+        r.resident_type === 'monthly_fee' ? '月費' : '社會局',
+        r.nhi_identity,
+        r.resident_type === 'monthly_fee' ? r.monthly_fee || '' : '',
+        r.resident_type === 'social_welfare' ? r.welfare_amount || '' : '',
+        r.welfare_type === 'disability' ? '身障保護安置' : r.welfare_type === 'homeless' ? '街友救助科' : '',
+        r.welfare_doc_no || '',
+        r.notes || '',
+        r.error || '',
+      ])
+    ]
+    const ws = XLSX.utils.aoa_to_sheet(data)
+    ws['!cols'] = [10,14,10,8,12,14,16,28,16,20].map(w => ({ wch: w }))
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '待確認住民')
+    XLSX.writeFile(wb, '待確認住民.xlsx')
+  }
+
   async function handleSave() {
     const validRows = rows.filter(r => !r.error)
     if (validRows.length === 0) return
@@ -255,15 +278,25 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
             <div>
               <span className="font-semibold text-gray-800">預覽（共 {rows.length} 筆）</span>
               {validCount > 0 && <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ {validCount} 筆正確</span>}
-              {errorCount > 0 && <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">✗ {errorCount} 筆有誤</span>}
+              {errorCount > 0 && <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">⚠ {errorCount} 筆待確認</span>}
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saving || validCount === 0}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {saving ? '存入中...' : `全部存入（${validCount} 筆）`}
-            </button>
+            <div className="flex gap-2">
+              {errorCount > 0 && (
+                <button
+                  onClick={exportErrors}
+                  className="border border-amber-400 text-amber-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-50 transition-colors"
+                >
+                  📥 匯出待確認（{errorCount} 筆）
+                </button>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={saving || validCount === 0}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {saving ? '存入中...' : `存入正確筆數（${validCount} 筆）`}
+              </button>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -275,6 +308,7 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">計費類型</th>
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">健保身份</th>
                   <th className="px-3 py-2 text-right text-gray-700 font-medium">月費金額</th>
+                  <th className="px-3 py-2 text-left text-gray-700 font-medium">補助類型</th>
                   <th className="px-3 py-2 text-left text-gray-700 font-medium">備註</th>
                   <th className="px-3 py-2 w-8"></th>
                 </tr>
@@ -336,6 +370,19 @@ export default function ResidentImport({ branches, defaultBranchId, isAdmin }: P
                           min="1"
                         />
                       )}
+                    </td>
+                    <td className="px-3 py-2">
+                      {row.resident_type === 'social_welfare' ? (
+                        <select
+                          value={row.welfare_type}
+                          onChange={e => updateRow(idx, 'welfare_type', e.target.value)}
+                          className={`border rounded px-2 py-1 text-sm text-gray-900 ${row.error?.includes('補助類型') ? 'border-red-400' : 'border-gray-300'}`}
+                        >
+                          <option value="">請選擇</option>
+                          <option value="disability">身障保護安置</option>
+                          <option value="homeless">街友救助科</option>
+                        </select>
+                      ) : <span className="text-gray-400 text-xs">—</span>}
                     </td>
                     <td className="px-3 py-2">
                       <input
