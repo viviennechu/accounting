@@ -16,7 +16,7 @@ export default async function ResidentImportPage() {
     <div className="max-w-4xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">批次匯入住民</h1>
-        <p className="text-gray-600 text-sm mt-1">上傳 Excel 檔案，一次新增多位住民</p>
+        <p className="text-gray-900 text-sm mt-1">上傳 Excel 檔案，一次新增多位住民</p>
       </div>
       <ResidentImport
         branches={branches || []}

@@ -52,7 +52,7 @@ export default async function NhiClaimsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">健保申報記錄</h1>
-          <p className="text-gray-600 text-sm mt-1">待收款 {pending.length} 筆 · 已收款 {received.length} 筆</p>
+          <p className="text-gray-900 text-sm mt-1">待收款 {pending.length} 筆 · 已收款 {received.length} 筆</p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
@@ -94,7 +94,7 @@ export default async function NhiClaimsPage() {
                   return (
                     <tr key={c.id}>
                       <td className="font-medium text-gray-900">{c.service_year}年{c.service_month}月</td>
-                      {isAdmin && <td className="text-sm text-gray-600">{(c.branch as any)?.name}</td>}
+                      {isAdmin && <td className="text-sm text-gray-900">{(c.branch as any)?.name}</td>}
                       <td className="font-mono text-gray-900">{c.total_points.toLocaleString('zh-TW')}</td>
                       <td className="font-mono text-gray-900">
                         {c.expected_amount ? formatCurrency(c.expected_amount) : (pv ? formatCurrency(Math.round(c.total_points * pv)) : '-')}
@@ -141,11 +141,11 @@ export default async function NhiClaimsPage() {
             </thead>
             <tbody>
               {received.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-600 py-8">尚無已收款記錄</td></tr>
+                <tr><td colSpan={isAdmin ? 7 : 6} className="text-center text-gray-900 py-8">尚無已收款記錄</td></tr>
               ) : received.map(c => (
                 <tr key={c.id}>
                   <td className="font-medium text-gray-900">{c.service_year}年{c.service_month}月</td>
-                  {isAdmin && <td className="text-sm text-gray-600">{(c.branch as any)?.name}</td>}
+                  {isAdmin && <td className="text-sm text-gray-900">{(c.branch as any)?.name}</td>}
                   <td className="font-mono text-gray-900">{c.total_points.toLocaleString('zh-TW')}</td>
                   <td className="font-mono text-gray-700">{c.expected_amount ? formatCurrency(c.expected_amount) : '-'}</td>
                   <td className="font-mono font-semibold text-gray-900">{c.received_amount ? formatCurrency(c.received_amount) : '-'}</td>

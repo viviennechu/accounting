@@ -270,7 +270,7 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
       )}
 
       {employees.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-900">
           此分公司尚無在職員工，請先至「員工管理」新增員工
         </div>
       ) : (
@@ -353,8 +353,8 @@ export default function ScheduleImport({ year, month, branchId, branches, isAdmi
 
       {/* 班別說明 */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <p className="text-xs font-semibold text-gray-600 mb-2">班別工時說明</p>
-        <div className="flex gap-4 text-xs text-gray-600">
+        <p className="text-xs font-semibold text-gray-900 mb-2">班別工時說明</p>
+        <div className="flex gap-4 text-xs text-gray-900">
           <span>D班 09-17（8h）</span>
           <span>E班 14-22（8h）</span>
           <span>N班 22-09（11h，有夜班津貼）</span>

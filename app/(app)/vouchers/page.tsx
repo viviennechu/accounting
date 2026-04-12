@@ -43,12 +43,7 @@ export default async function VouchersPage({
     query = query.eq('branch_id', branchId)
   }
 
-  const { data: vouchers, error: voucherError } = await query
-
-  // 診斷用
-  const { data: roleData } = await supabase.rpc('get_my_role')
-  const { data: allVouchers } = await supabase.from('vouchers').select('id, date').limit(5)
-  console.log('DIAG endDate:', endDate, 'role:', roleData, 'allVouchers:', allVouchers?.length, 'voucherCount:', vouchers?.length, 'error:', voucherError?.message)
+  const { data: vouchers } = await query
 
   // 取得分公司清單（admin 用）
   const { data: branches } = await supabase.from('branches').select('id, name')
@@ -77,10 +72,6 @@ export default async function VouchersPage({
         showBranch={isAdmin}
       />
 
-      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4 text-xs font-mono">
-        role: {roleData ?? 'null'} | endDate: {endDate} | vouchers: {vouchers?.length ?? 'null'} | allVouchers: {allVouchers?.length ?? 'null'} | error: {voucherError?.message ?? 'none'}
-      </div>
-
       {/* 傳票清單 */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -96,12 +87,13 @@ export default async function VouchersPage({
                 <th className="w-24">借方</th>
                 <th className="w-24">貸方</th>
                 <th className="w-16">附件</th>
+                <th className="w-12"></th>
               </tr>
             </thead>
             <tbody>
               {!vouchers || vouchers.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 9 : 8} className="text-center text-gray-600 py-8">
+                  <td colSpan={isAdmin ? 9 : 8} className="text-center text-gray-900 py-8">
                     本月尚無傳票記錄
                   </td>
                 </tr>
@@ -121,13 +113,13 @@ export default async function VouchersPage({
                             {v.voucher_no || '-'}
                           </td>
                           {isAdmin && (
-                            <td rowSpan={lines.length} className="text-center align-top pt-2 text-xs text-gray-600">
+                            <td rowSpan={lines.length} className="text-center align-top pt-2 text-xs text-gray-900">
                               {(v.branch as any)?.name}
                             </td>
                           )}
                         </>
                       )}
-                      <td className="text-gray-600">{line.account?.code}</td>
+                      <td className="text-gray-900">{line.account?.code}</td>
                       <td>{line.account?.name}</td>
                       <td className="text-gray-700">{line.note || v.description}</td>
                       <td className="text-right font-mono">
@@ -137,11 +129,22 @@ export default async function VouchersPage({
                         {line.credit > 0 ? formatCurrency(line.credit) : ''}
                       </td>
                       {idx === 0 && (
-                        <td rowSpan={lines.length} className="text-center align-top pt-2">
-                          {v.attachment_url && (
-                            <a href={v.attachment_url} target="_blank" className="text-blue-500 text-lg">📎</a>
-                          )}
-                        </td>
+                        <>
+                          <td rowSpan={lines.length} className="text-center align-top pt-2">
+                            {v.attachment_url && (
+                              <a href={v.attachment_url} target="_blank" className="text-blue-500 text-lg">📎</a>
+                            )}
+                          </td>
+                          <td rowSpan={lines.length} className="text-center align-top pt-1">
+                            <Link
+                              href={`/vouchers/${v.id}/edit`}
+                              className="text-gray-700 hover:text-blue-600 text-sm px-1"
+                              title="編輯"
+                            >
+                              ✏️
+                            </Link>
+                          </td>
+                        </>
                       )}
                     </tr>
                   ))

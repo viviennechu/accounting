@@ -172,4 +172,5 @@ export interface OcrResult {
   suggested_account_code: string | null
   is_debit: boolean  // true=借方(支出), false=貸方(收入)
   confidence: 'high' | 'medium' | 'low'
+  bbox?: { x1: number; y1: number; x2: number; y2: number } | null
 }

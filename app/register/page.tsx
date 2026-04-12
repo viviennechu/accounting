@@ -66,7 +66,7 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
           <div className="text-5xl mb-4">✅</div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">註冊成功！</h2>
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-900 text-sm mb-6">
             帳號已建立，請直接登入開始使用。
           </p>
           <Link

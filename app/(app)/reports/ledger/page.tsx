@@ -108,7 +108,7 @@ export default async function LedgerPage({
             <tbody>
               {!vouchers || vouchers.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-600 py-8">
+                  <td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-900 py-8">
                     本月尚無記錄
                   </td>
                 </tr>
@@ -131,11 +131,11 @@ export default async function LedgerPage({
                           </td>
                         )}
                         {isAdmin && idx === 0 && (
-                          <td rowSpan={(v.voucher_lines || []).length} className="align-top pt-2 text-center text-xs text-gray-600">
+                          <td rowSpan={(v.voucher_lines || []).length} className="align-top pt-2 text-center text-xs text-gray-900">
                             {v.branch?.name}
                           </td>
                         )}
-                        <td className="text-xs text-gray-600">{acct?.code} {acct?.name}</td>
+                        <td className="text-xs text-gray-900">{acct?.code} {acct?.name}</td>
                         <td className="text-sm">{line.note || v.description}</td>
                         <td className="font-mono text-green-700">
                           {(isIncome && displayAmount > 0) ? formatCurrency(displayAmount) : ''}

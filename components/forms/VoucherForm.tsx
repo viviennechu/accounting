@@ -200,7 +200,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
               <div>
                 <div className="text-3xl mb-2">📄</div>
                 <div className="text-sm text-blue-600">點擊選擇或拍攝發票/收據</div>
-                <div className="text-xs text-gray-600 mt-1">支援 JPG、PNG</div>
+                <div className="text-xs text-gray-900 mt-1">支援 JPG、PNG</div>
               </div>
             )}
             <input
@@ -245,7 +245,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {isAdmin && (
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">分公司</label>
+              <label className="block text-xs font-medium text-gray-900 mb-1">分公司</label>
               <select
                 value={branchId}
                 onChange={e => setBranchId(e.target.value)}
@@ -258,7 +258,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">傳票日期 *</label>
+            <label className="block text-xs font-medium text-gray-900 mb-1">傳票日期 *</label>
             <input
               type="date"
               value={date}
@@ -268,7 +268,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">傳票編號</label>
+            <label className="block text-xs font-medium text-gray-900 mb-1">傳票編號</label>
             <input
               type="text"
               value={voucherNo}
@@ -278,7 +278,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
             />
           </div>
           <div className="sm:col-span-3">
-            <label className="block text-xs font-medium text-gray-600 mb-1">摘要</label>
+            <label className="block text-xs font-medium text-gray-900 mb-1">摘要</label>
             <input
               type="text"
               value={description}
@@ -309,7 +309,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
             <tbody>
               {lines.map((line, idx) => (
                 <tr key={idx} className="border-b border-gray-100">
-                  <td className="py-2 text-gray-600 text-xs">{idx + 1}</td>
+                  <td className="py-2 text-gray-900 text-xs">{idx + 1}</td>
                   <td className="py-2 pr-2">
                     <select
                       value={line.account_id}
@@ -359,7 +359,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
                     <button
                       type="button"
                       onClick={() => removeLine(idx)}
-                      className="text-gray-600 hover:text-red-500 transition-colors"
+                      className="text-gray-900 hover:text-red-500 transition-colors"
                     >
                       ✕
                     </button>
@@ -415,7 +415,7 @@ export default function VoucherForm({ accounts, branches, defaultBranchId, isAdm
         <button
           type="button"
           onClick={() => router.back()}
-          className="border border-gray-300 text-gray-600 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          className="border border-gray-300 text-gray-900 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           取消
         </button>

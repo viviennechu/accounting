@@ -42,7 +42,7 @@ export default async function PayrollVerifyPage({
     <div className="max-w-6xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">薪資核對</h1>
-        <p className="text-gray-600 text-sm mt-1">核對計算薪資與實際發放金額</p>
+        <p className="text-gray-900 text-sm mt-1">核對計算薪資與實際發放金額</p>
       </div>
 
       <PayrollVerify

@@ -44,7 +44,7 @@ export default async function SchedulesPage({
     <div className="max-w-6xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">班表上傳</h1>
-        <p className="text-gray-600 text-sm mt-1">上傳 Excel 班表，系統自動計算薪資</p>
+        <p className="text-gray-900 text-sm mt-1">上傳 Excel 班表，系統自動計算薪資</p>
       </div>
 
       <ScheduleImport

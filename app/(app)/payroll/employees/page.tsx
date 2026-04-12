@@ -28,7 +28,7 @@ export default async function EmployeesPage() {
     <div className="max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">員工管理</h1>
-        <p className="text-gray-600 text-sm mt-1">管理員工基本資料、薪資設定</p>
+        <p className="text-gray-900 text-sm mt-1">管理員工基本資料、薪資設定</p>
       </div>
 
       <EmployeeManager

@@ -25,15 +25,15 @@ export default async function BranchesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="text-left px-4 py-3 font-medium text-gray-600">分公司名稱</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">代碼</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">建立日期</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">分公司名稱</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">代碼</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">建立日期</th>
             </tr>
           </thead>
           <tbody>
             {(branches || []).map(b => (
               <tr key={b.id} className="border-b border-gray-100 last:border-0">
-                <td className="px-4 py-3 font-medium">{b.name}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{b.name}</td>
                 <td className="px-4 py-3 text-gray-700 font-mono">{b.code}</td>
                 <td className="px-4 py-3 text-gray-700 text-xs">
                   {new Date(b.created_at).toLocaleDateString('zh-TW')}
@@ -44,7 +44,7 @@ export default async function BranchesPage() {
         </table>
       </div>
 
-      <p className="text-sm text-gray-600 mt-3">如需新增分公司，請聯繫系統管理員直接更新資料庫。</p>
+      <p className="text-sm text-gray-900 mt-3">如需新增分公司，請聯繫系統管理員直接更新資料庫。</p>
     </div>
   )
 }

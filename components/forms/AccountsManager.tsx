@@ -194,7 +194,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <span className="font-semibold text-gray-800">常用科目庫</span>
-            <button onClick={() => { setShowPreset(false); setSelectedPresets(new Set()) }} className="text-gray-600 hover:text-gray-600 text-sm">✕ 關閉</button>
+            <button onClick={() => { setShowPreset(false); setSelectedPresets(new Set()) }} className="text-gray-900 hover:text-gray-900 text-sm">✕ 關閉</button>
           </div>
           <div className="p-4 space-y-4">
             {Object.entries(TYPE_LABELS).map(([type, label]) => {
@@ -213,7 +213,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
                           key={p.code}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm cursor-pointer transition-colors ${
                             exists
-                              ? 'border-gray-100 bg-gray-50 text-gray-600 cursor-not-allowed'
+                              ? 'border-gray-100 bg-gray-50 text-gray-900 cursor-not-allowed'
                               : checked
                               ? 'border-blue-300 bg-blue-50 text-blue-800'
                               : 'border-gray-200 hover:border-gray-300 text-gray-700'
@@ -230,9 +230,9 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
                             }}
                             className="rounded"
                           />
-                          <span className="font-mono text-xs text-gray-600 w-10 shrink-0">{p.code}</span>
+                          <span className="font-mono text-xs text-gray-900 w-10 shrink-0">{p.code}</span>
                           <span>{p.name}</span>
-                          {exists && <span className="ml-auto text-xs text-gray-600">已新增</span>}
+                          {exists && <span className="ml-auto text-xs text-gray-900">已新增</span>}
                         </label>
                       )
                     })}
@@ -257,7 +257,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
           <h3 className="font-semibold text-gray-700">新增科目</h3>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">科目代號</label>
+              <label className="text-xs text-gray-900 mb-1 block">科目代號</label>
               <input
                 type="text"
                 value={newCode}
@@ -267,7 +267,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
               />
             </div>
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">科目名稱</label>
+              <label className="text-xs text-gray-900 mb-1 block">科目名稱</label>
               <input
                 type="text"
                 value={newName}
@@ -277,7 +277,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
               />
             </div>
             <div>
-              <label className="text-xs text-gray-600 mb-1 block">類型</label>
+              <label className="text-xs text-gray-900 mb-1 block">類型</label>
               <select
                 value={newType}
                 onChange={e => setNewType(e.target.value)}
@@ -299,7 +299,7 @@ export default function AccountsManager({ accounts, branches, currentBranchId, i
             </button>
             <button
               onClick={() => setAdding(false)}
-              className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
+              className="border border-gray-300 text-gray-900 px-4 py-2 rounded-lg text-sm hover:bg-gray-50"
             >
               取消
             </button>

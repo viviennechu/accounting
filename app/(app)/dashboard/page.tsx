@@ -90,7 +90,7 @@ export default async function DashboardPage() {
                   >
                     年度總表
                   </Link>
-                  <span className="text-gray-300">·</span>
+                  <span className="text-gray-700">·</span>
                   <Link
                     href={`/vouchers?branch=${b.id}`}
                     className="text-xs text-blue-600 hover:underline"

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import CreateUserForm from '@/components/admin/CreateUserForm'
 
 export default async function UsersPage() {
   const supabase = await createClient()
@@ -17,54 +18,51 @@ export default async function UsersPage() {
     .select('id, name, role, created_at, branch:branches(name)')
     .order('created_at')
 
+  const { data: branches } = await supabase
+    .from('branches')
+    .select('id, name')
+    .order('name')
+
   return (
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">用戶管理</h1>
-        <p className="text-sm text-gray-700">新增用戶請至 Supabase 後台 Auth 頁面邀請</p>
+        <h1 className="text-2xl font-bold text-gray-900">用戶管理</h1>
+        <CreateUserForm branches={branches || []} />
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="text-left px-4 py-3 font-medium text-gray-600">姓名</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">所屬分公司</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">角色</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">建立日期</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">姓名</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Email</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">所屬分公司</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">角色</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">建立日期</th>
             </tr>
           </thead>
           <tbody>
             {(users || []).map(u => (
               <tr key={u.id} className="border-b border-gray-100 last:border-0">
                 <td className="px-4 py-3 font-medium">{u.name}</td>
-                <td className="px-4 py-3 text-gray-600">{(u.branch as any)?.name || '（總管理者）'}</td>
+                <td className="px-4 py-3 text-gray-900 text-xs">{(u as any).email || '—'}</td>
+                <td className="px-4 py-3 text-gray-900">{(u.branch as any)?.name || '（總管理者）'}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                     u.role === 'admin' ? 'bg-purple-100 text-purple-700' :
                     u.role === 'accountant' ? 'bg-blue-100 text-blue-700' :
-                    'bg-gray-100 text-gray-600'
+                    'bg-gray-100 text-gray-900'
                   }`}>
                     {u.role === 'admin' ? '管理者' : u.role === 'accountant' ? '記帳人員' : '檢視者'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-gray-700 text-xs">
+                <td className="px-4 py-3 text-gray-900 text-xs">
                   {new Date(u.created_at).toLocaleDateString('zh-TW')}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
-        <strong>新增用戶步驟：</strong>
-        <ol className="mt-2 space-y-1 list-decimal list-inside">
-          <li>到 Supabase 後台 → Authentication → Users → Invite User</li>
-          <li>輸入新用戶的 Email</li>
-          <li>用戶收到邀請信後設定密碼登入</li>
-          <li>在資料庫 profiles 表中設定該用戶的 branch_id 和 role</li>
-        </ol>
       </div>
     </div>
   )

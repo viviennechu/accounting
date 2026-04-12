@@ -231,7 +231,7 @@ export default function PayrollVerify({
       </div>
 
       {employees.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-900">
           此分公司尚無員工，請先至「員工管理」新增員工
         </div>
       ) : (
@@ -298,7 +298,7 @@ export default function PayrollVerify({
                       return (
                         <tr key={emp.id} className="border-b border-gray-100 bg-gray-50">
                           <td className="px-4 py-2.5 font-medium text-gray-700">{emp.name}</td>
-                          <td colSpan={12} className="px-4 py-2.5 text-gray-500 text-xs">尚未輸入班表</td>
+                          <td colSpan={12} className="px-4 py-2.5 text-gray-800 text-xs">尚未輸入班表</td>
                           <td className="px-3 py-2.5 text-center">
                             <button onClick={() => openModal(emp)}
                               className="text-blue-600 hover:text-blue-800 text-xs font-medium">輸入班次</button>
@@ -338,7 +338,7 @@ export default function PayrollVerify({
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           {actual === 0 ? (
-                            <span className="text-gray-600 text-xs">未填</span>
+                            <span className="text-gray-900 text-xs">未填</span>
                           ) : match ? (
                             <span className="text-green-600 text-xs font-medium">✓ 相符</span>
                           ) : (
@@ -349,7 +349,7 @@ export default function PayrollVerify({
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           <button onClick={() => openModal(emp)}
-                            className="text-gray-500 hover:text-blue-600 text-xs">編輯</button>
+                            className="text-gray-800 hover:text-blue-600 text-xs">編輯</button>
                         </td>
                       </tr>
                     )
@@ -369,7 +369,7 @@ export default function PayrollVerify({
               <h2 className="font-semibold text-gray-800">
                 {modalEmp.name} — {selectedYear}/{selectedMonth} 班次輸入
               </h2>
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-lg">✕</button>
+              <button onClick={closeModal} className="text-gray-800 hover:text-gray-700 text-lg">✕</button>
             </div>
 
             <div className="px-6 py-5 space-y-4">

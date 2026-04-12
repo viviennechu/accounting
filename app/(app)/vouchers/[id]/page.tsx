@@ -29,10 +29,18 @@ export default async function VoucherDetailPage({
 
   return (
     <div className="max-w-3xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/vouchers" className="text-gray-700 hover:text-gray-700">← 傳票清單</Link>
-        <span className="text-gray-300">|</span>
-        <h1 className="text-xl font-bold text-gray-800">傳票詳情</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Link href="/vouchers" className="text-gray-800 hover:text-gray-700">← 傳票清單</Link>
+          <span className="text-gray-700">|</span>
+          <h1 className="text-xl font-bold text-gray-800">傳票詳情</h1>
+        </div>
+        <Link
+          href={`/vouchers/${id}/edit`}
+          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+        >
+          ✏️ 編輯
+        </Link>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
@@ -74,7 +82,7 @@ export default async function VoucherDetailPage({
                 <tr key={line.id} className="border-b border-gray-100">
                   <td className="py-2 text-gray-700">{line.account?.code}</td>
                   <td className="py-2">{line.account?.name}</td>
-                  <td className="py-2 text-gray-600">{line.note || '—'}</td>
+                  <td className="py-2 text-gray-900">{line.note || '—'}</td>
                   <td className="py-2 text-right font-mono">{line.debit > 0 ? formatCurrency(line.debit) : ''}</td>
                   <td className="py-2 text-right font-mono">{line.credit > 0 ? formatCurrency(line.credit) : ''}</td>
                 </tr>
@@ -102,7 +110,7 @@ export default async function VoucherDetailPage({
           </div>
         )}
 
-        <div className="text-xs text-gray-600 border-t border-gray-100 pt-3">
+        <div className="text-xs text-gray-900 border-t border-gray-100 pt-3">
           建立時間：{new Date(voucher.created_at).toLocaleString('zh-TW')}
         </div>
       </div>

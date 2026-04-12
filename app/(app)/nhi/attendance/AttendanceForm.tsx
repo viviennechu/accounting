@@ -166,7 +166,7 @@ export default function AttendanceForm({ year, month, daysInMonth, branchId, bra
       </div>
 
       {residents.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-600">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-900">
           此分公司尚無在籍住民
         </div>
       ) : (
@@ -210,7 +210,7 @@ export default function AttendanceForm({ year, month, daysInMonth, branchId, bra
                         <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
                           r.subsidy_type === 'both' ? 'bg-purple-100 text-purple-700' :
                           r.subsidy_type === 'subsidy' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-600'
+                          'bg-gray-100 text-gray-900'
                         }`}>
                           {r.subsidy_type === 'both' ? '自費＋補助' : r.subsidy_type === 'subsidy' ? '補助' : '自費'}
                         </span>

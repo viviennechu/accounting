@@ -53,7 +53,7 @@ export default async function ResidentFeesPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">住民月費管理</h1>
-          <p className="text-gray-600 text-sm mt-1">{year}年{month}月</p>
+          <p className="text-gray-900 text-sm mt-1">{year}年{month}月</p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default async function ResidentFeesPage({
             </thead>
             <tbody>
               {!residents || residents.length === 0 ? (
-                <tr><td colSpan={7} className="text-center text-gray-600 py-8">本月尚無在籍住民</td></tr>
+                <tr><td colSpan={7} className="text-center text-gray-900 py-8">本月尚無在籍住民</td></tr>
               ) : residents.map(r => {
                 const fee = feeMap[r.id]
                 const typeLabel = r.resident_type === 'social_welfare' ? '社會局' : '月費'
@@ -119,7 +119,7 @@ export default async function ResidentFeesPage({
                           feeId={fee?.id}
                         />
                       ) : (
-                        <span className="text-xs text-gray-600">-</span>
+                        <span className="text-xs text-gray-900">-</span>
                       )}
                     </td>
                   </tr>

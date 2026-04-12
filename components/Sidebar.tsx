@@ -13,6 +13,8 @@ const navItems = [
   { href: '/dashboard', label: '儀表板', icon: '📊' },
   { href: '/vouchers', label: '傳票日記簿', icon: '📋' },
   { href: '/vouchers/new', label: '新增傳票', icon: '➕' },
+  { href: '/vouchers/batch', label: '批次上傳憑證', icon: '📷' },
+  { href: '/vouchers/gallery', label: '發票瀏覽器', icon: '🖼️' },
   { href: '/reports/annual', label: '年度總表', icon: '📈' },
   { href: '/reports/ledger', label: '流水帳', icon: '📒' },
   { href: '/reports/consolidated', label: '合併報表', icon: '🏢', adminOnly: true },
@@ -35,6 +37,7 @@ const adminItems = [
   { href: '/admin/branches', label: '分公司管理', icon: '🏠' },
   { href: '/admin/users', label: '用戶管理', icon: '👥' },
   { href: '/admin/accounts', label: '科目代號', icon: '⚙️' },
+  { href: '/admin/custom-fields', label: '自訂欄位', icon: '🗂️' },
 ]
 
 export default function Sidebar({ profile }: SidebarProps) {
@@ -56,7 +59,7 @@ export default function Sidebar({ profile }: SidebarProps) {
         <div className="text-xs text-gray-700 mt-1 truncate">
           {profile?.branch?.name || '總管理者'}
         </div>
-        <div className="text-xs text-gray-600">{profile?.name}</div>
+        <div className="text-xs text-gray-900">{profile?.name}</div>
       </div>
 
       {/* Navigation */}
@@ -80,7 +83,7 @@ export default function Sidebar({ profile }: SidebarProps) {
 
         {/* 健保管理 */}
         <>
-          <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+          <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-900 uppercase tracking-wider">
             健保管理
           </div>
           {nhiItems
@@ -103,7 +106,7 @@ export default function Sidebar({ profile }: SidebarProps) {
 
         {/* 薪資管理 */}
         <>
-          <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+          <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-900 uppercase tracking-wider">
             薪資管理
           </div>
           {payrollItems.map(item => (
@@ -124,7 +127,7 @@ export default function Sidebar({ profile }: SidebarProps) {
 
         {isAdmin && (
           <>
-            <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <div className="pt-3 pb-1 px-3 text-xs font-semibold text-gray-900 uppercase tracking-wider">
               管理
             </div>
             {adminItems.map(item => (

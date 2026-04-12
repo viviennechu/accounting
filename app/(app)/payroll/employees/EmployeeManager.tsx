@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
 
@@ -42,6 +43,7 @@ export default function EmployeeManager({ employees, branches, defaultBranchId, 
   const [form, setForm] = useState(emptyForm(defaultBranchId))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [filterBranch, setFilterBranch] = useState('')
 
   function openNew() {
     setEditing(null)
@@ -100,14 +102,33 @@ export default function EmployeeManager({ employees, branches, defaultBranchId, 
   }
 
   const colCount = isAdmin ? 8 : 7
+  const filteredEmployees = filterBranch
+    ? employees.filter(e => e.branch_id === filterBranch)
+    : employees
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-2">
+        {isAdmin && (
+          <select
+            value={filterBranch}
+            onChange={e => setFilterBranch(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900"
+          >
+            <option value="">全部分公司</option>
+            {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+        )}
+        <div className="flex gap-2 ml-auto">
+        <Link href="/payroll/employees/import"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+          📥 批次匯入
+        </Link>
         <button onClick={openNew}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
           ＋ 新增員工
         </button>
+        </div>
       </div>
 
       {showForm && (
@@ -193,15 +214,15 @@ export default function EmployeeManager({ employees, branches, defaultBranchId, 
             </tr>
           </thead>
           <tbody>
-            {employees.length === 0 ? (
+            {filteredEmployees.length === 0 ? (
               <tr>
-                <td colSpan={colCount} className="px-4 py-8 text-center text-gray-600">尚無員工資料</td>
+                <td colSpan={colCount} className="px-4 py-8 text-center text-gray-900">尚無員工資料</td>
               </tr>
-            ) : employees.map(emp => (
+            ) : filteredEmployees.map(emp => (
               <tr key={emp.id} className="border-b border-gray-100 hover:bg-gray-50">
                 {isAdmin && <td className="px-4 py-3 text-gray-700">{emp.branch?.name}</td>}
                 <td className="px-4 py-3 font-medium text-gray-900">{emp.name}</td>
-                <td className="px-4 py-3 text-gray-600">{emp.title || '-'}</td>
+                <td className="px-4 py-3 text-gray-900">{emp.title || '-'}</td>
                 <td className="px-4 py-3 text-right font-mono text-gray-900">{formatCurrency(emp.base_salary)}</td>
                 <td className="px-4 py-3 text-right font-mono text-gray-700">
                   {emp.license_fee > 0 ? formatCurrency(emp.license_fee) : '-'}

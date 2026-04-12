@@ -44,7 +44,7 @@ export default async function AttendancePage({
     <div className="max-w-5xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">每月出席登錄</h1>
-        <p className="text-gray-600 text-sm mt-1">登錄每位住民當月實際在院天數，系統自動計算補助與自付額</p>
+        <p className="text-gray-900 text-sm mt-1">登錄每位住民當月實際在院天數，系統自動計算補助與自付額</p>
       </div>
 
       <AttendanceForm

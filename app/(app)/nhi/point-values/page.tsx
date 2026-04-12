@@ -25,7 +25,7 @@ export default async function PointValuesPage() {
     <div className="max-w-2xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">健保點值設定</h1>
-        <p className="text-gray-600 text-sm mt-1">每季由健保署公告，影響申報預估收款金額</p>
+        <p className="text-gray-900 text-sm mt-1">每季由健保署公告，影響申報預估收款金額</p>
       </div>
 
       <PointValueForm existingValues={pointValues || []} years={years} />

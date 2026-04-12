@@ -169,7 +169,7 @@ export default function ResidentForm({ branches, defaultBranchId, isAdmin, initi
               placeholder="例：10950、9000、8000"
               min="1"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900" />
-            <p className="text-xs text-gray-600 mt-1">填入家屬實際繳交金額（已扣除低收等折扣後的金額）</p>
+            <p className="text-xs text-gray-900 mt-1">填入家屬實際繳交金額（已扣除低收等折扣後的金額）</p>
           </div>
         </div>
       )}

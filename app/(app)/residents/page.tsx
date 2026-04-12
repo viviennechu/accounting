@@ -39,7 +39,7 @@ export default async function ResidentsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">住民管理</h1>
-          <p className="text-gray-600 text-sm mt-1">在籍 {active.length} 人 · 離院 {inactive.length} 人</p>
+          <p className="text-gray-900 text-sm mt-1">在籍 {active.length} 人 · 離院 {inactive.length} 人</p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -76,11 +76,11 @@ export default async function ResidentsPage() {
             </thead>
             <tbody>
               {active.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-600 py-8">尚無在籍住民</td></tr>
+                <tr><td colSpan={isAdmin ? 6 : 5} className="text-center text-gray-900 py-8">尚無在籍住民</td></tr>
               ) : active.map(r => (
                 <tr key={r.id}>
                   <td className="font-medium text-gray-900">{r.name}</td>
-                  {isAdmin && <td className="text-sm text-gray-600">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
+                  {isAdmin && <td className="text-sm text-gray-900">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
                   <td className="text-sm text-gray-700">{r.admission_date}</td>
                   <td>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -109,7 +109,7 @@ export default async function ResidentsPage() {
       {inactive.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="font-semibold text-gray-600">已離院（{inactive.length} 人）</h2>
+            <h2 className="font-semibold text-gray-900">已離院（{inactive.length} 人）</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="report-table">
@@ -126,10 +126,10 @@ export default async function ResidentsPage() {
                 {inactive.map(r => (
                   <tr key={r.id} className="opacity-60">
                     <td className="text-gray-700">{r.name}</td>
-                    {isAdmin && <td className="text-sm text-gray-600">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
+                    {isAdmin && <td className="text-sm text-gray-900">{branches?.find(b => b.id === r.branch_id)?.name}</td>}
                     <td className="text-sm">{r.admission_date}</td>
                     <td className="text-sm">{r.discharge_date}</td>
-                    <td><span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{residentTypeLabel(r.resident_type)}</span></td>
+                    <td><span className="text-xs bg-gray-100 text-gray-900 px-2 py-0.5 rounded-full">{residentTypeLabel(r.resident_type)}</span></td>
                   </tr>
                 ))}
               </tbody>

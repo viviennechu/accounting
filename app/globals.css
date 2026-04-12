@@ -12,17 +12,20 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 這個系統不支援深色模式，固定使用淺色 */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Noto Sans TC', Arial, Helvetica, sans-serif;
+}
+
+/* 全站文字加深，避免淺灰色看不清楚 */
+@theme {
+  --color-gray-400: oklch(0.446 0.011 264.436);
+  --color-gray-500: oklch(0.373 0.009 264.436);
+  --color-gray-600: oklch(0.269 0.006 264.436);
+  --color-gray-700: oklch(0.210 0.005 264.436);
 }
 
 /* 報表表格樣式 */
