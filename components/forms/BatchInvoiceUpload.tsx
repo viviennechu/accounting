@@ -103,8 +103,9 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [branchId, setBranchId] = useState(defaultBranchId || branches[0]?.id || '')
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
+  const [loadingProgress, setLoadingProgress] = useState('')
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<InvoiceItem[]>([])
   const [saving, setSaving] = useState(false)
@@ -125,83 +126,100 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPhotoFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    setPhotoFiles(prev => {
+      const merged = [...prev, ...files]
+      setPhotoPreviews(merged.map(f => URL.createObjectURL(f)))
+      return merged
+    })
     setItems([])
     setSavedCount(null)
     setError('')
+    e.target.value = ''
+  }
+
+  function removePhoto(index: number) {
+    setPhotoFiles(prev => prev.filter((_, i) => i !== index))
+    setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleOcr() {
-    if (!photoFile) return
+    if (photoFiles.length === 0) return
     setLoading(true)
     setError('')
     setItems([])
 
     try {
       // 拉取自訂欄位定義
-      const supabaseForFields = createClient()
-      const { data: fieldDefs } = await supabaseForFields
+      const supabase = createClient()
+      const { data: fieldDefs } = await supabase
         .from('custom_field_definitions')
         .select('id, label, field_type, options, required')
         .eq('branch_id', branchId)
         .order('field_order')
       setCustomFields(fieldDefs || [])
 
-      const compressed = await compressImage(photoFile)
-      const formData = new FormData()
-      formData.append('file', compressed)
-      formData.append('branch_id', branchId)
+      const allItems: InvoiceItem[] = []
 
-      const res = await fetch('/api/vouchers/ocr-multi', { method: 'POST', body: formData })
-      console.log('OCR API status:', res.status)
-      const data = await res.json()
-      console.log('OCR API response:', data)
+      for (let photoIndex = 0; photoIndex < photoFiles.length; photoIndex++) {
+        const photoFile = photoFiles[photoIndex]
+        setLoadingProgress(`辨識第 ${photoIndex + 1} / ${photoFiles.length} 張...`)
 
-      if (!data.results || data.results.length === 0) {
-        setError(`未偵測到任何憑證（API 回應：${JSON.stringify(data)}）`)
+        const compressed = await compressImage(photoFile)
+        const formData = new FormData()
+        formData.append('file', compressed)
+        formData.append('branch_id', branchId)
+
+        const res = await fetch('/api/vouchers/ocr-multi', { method: 'POST', body: formData })
+        const data = await res.json()
+
+        if (!data.results || data.results.length === 0) continue
+
+        const newItems: InvoiceItem[] = await Promise.all(
+          data.results.map(async (ocr: OcrResult) => {
+            const type: 'expense' | 'income' = ocr.is_debit ? 'expense' : 'income'
+            const mainAccs = getMainAccounts(type)
+            const matched = ocr.suggested_account_code
+              ? mainAccs.find(a => a.code === ocr.suggested_account_code)
+              : null
+
+            let croppedFile: File | undefined
+            let croppedPreview: string | undefined
+            if (ocr.bbox) {
+              croppedFile = await cropFromBbox(photoFile, ocr.bbox)
+              croppedPreview = URL.createObjectURL(croppedFile)
+            }
+
+            return {
+              ocr,
+              type,
+              date: ocr.date || new Date().toISOString().split('T')[0],
+              amount: ocr.amount ? String(ocr.amount) : '',
+              description: ocr.description || '',
+              mainAccountId: matched?.id || '',
+              cashAccountId: cashAccounts[0]?.id || '',
+              skip: false,
+              croppedFile,
+              croppedPreview,
+              customValues: {},
+            }
+          })
+        )
+
+        allItems.push(...newItems)
+      }
+
+      if (allItems.length === 0) {
+        setError('所有照片均未偵測到任何憑證，請重試')
         setLoading(false)
         return
       }
 
-      const newItems: InvoiceItem[] = await Promise.all(
-        data.results.map(async (ocr: OcrResult) => {
-          const type: 'expense' | 'income' = ocr.is_debit ? 'expense' : 'income'
-          const mainAccs = getMainAccounts(type)
-          const matched = ocr.suggested_account_code
-            ? mainAccs.find(a => a.code === ocr.suggested_account_code)
-            : null
-
-          // 裁切個別憑證照片
-          let croppedFile: File | undefined
-          let croppedPreview: string | undefined
-          if (ocr.bbox && photoFile) {
-            croppedFile = await cropFromBbox(photoFile, ocr.bbox)
-            croppedPreview = URL.createObjectURL(croppedFile)
-          }
-
-          return {
-            ocr,
-            type,
-            date: ocr.date || new Date().toISOString().split('T')[0],
-            amount: ocr.amount ? String(ocr.amount) : '',
-            description: ocr.description || '',
-            mainAccountId: matched?.id || '',
-            cashAccountId: cashAccounts[0]?.id || '',
-            skip: false,
-            croppedFile,
-            croppedPreview,
-            customValues: {},
-          }
-        })
-      )
-
-      // 重複偵測：查詢同分公司、同日期、同金額是否已有紀錄
-      const supabase = createClient()
+      // 重複偵測
+      setLoadingProgress('檢查重複中...')
       const itemsWithDupCheck = await Promise.all(
-        newItems.map(async (item) => {
+        allItems.map(async (item) => {
           const amt = Number(item.amount)
           if (!amt || !item.date) return { ...item, duplicate: null }
 
@@ -231,6 +249,7 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
       setError('辨識失敗，請重試')
     } finally {
       setLoading(false)
+      setLoadingProgress('')
     }
   }
 
@@ -316,8 +335,8 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
     setSaving(false)
     setSavedCount(count)
     setItems([])
-    setPhotoFile(null)
-    setPhotoPreview(null)
+    setPhotoFiles([])
+    setPhotoPreviews([])
   }
 
   const activeCount = items.filter(i => !i.skip).length
@@ -362,51 +381,70 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
 
       {/* 上傳區 */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <h2 className="font-semibold text-blue-800 mb-3">📷 上傳憑證照片</h2>
-        <p className="text-xs text-blue-600 mb-3">一張照片可包含多張發票，AI 會自動辨識每一張</p>
+        <h2 className="font-semibold text-blue-800 mb-1">📷 上傳憑證照片</h2>
+        <p className="text-xs text-blue-600 mb-3">可一次選多張照片，每張可包含多張發票，AI 會全部辨識</p>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div
-            className="flex-1 border-2 border-dashed border-blue-300 rounded-lg p-5 text-center cursor-pointer hover:bg-blue-100 transition-colors"
-            onClick={() => fileRef.current?.click()}
-          >
-            {photoPreview ? (
-              <img src={photoPreview} alt="照片預覽" className="max-h-48 mx-auto rounded object-contain" />
-            ) : (
-              <div>
-                <div className="text-3xl mb-2">📄</div>
-                <div className="text-sm text-blue-600">點擊選擇或拍攝照片</div>
-                <div className="text-xs text-gray-700 mt-1">支援 JPG、PNG</div>
-              </div>
-            )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
-
-          {photoFile && (
-            <div className="flex flex-col gap-2 justify-start">
-              <button
-                type="button"
-                onClick={handleOcr}
-                disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? '⏳ 辨識中...' : '🤖 AI 批次辨識'}
-              </button>
-              {items.length > 0 && (
-                <div className="text-xs bg-green-50 text-green-700 p-2 rounded-lg">
-                  偵測到 {items.length} 張憑證
-                </div>
-              )}
-            </div>
-          )}
+        {/* 選擇照片按鈕 */}
+        <div
+          className="border-2 border-dashed border-blue-300 rounded-lg p-4 text-center cursor-pointer hover:bg-blue-100 transition-colors mb-3"
+          onClick={() => fileRef.current?.click()}
+        >
+          <div className="text-2xl mb-1">📂</div>
+          <div className="text-sm text-blue-600 font-medium">點擊新增照片</div>
+          <div className="text-xs text-gray-600 mt-0.5">支援 JPG、PNG，可一次選多張</div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
+
+        {/* 已選照片縮圖 */}
+        {photoPreviews.length > 0 && (
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
+            {photoPreviews.map((src, idx) => (
+              <div key={idx} className="relative group aspect-square">
+                <img
+                  src={src}
+                  alt={`照片 ${idx + 1}`}
+                  className="w-full h-full object-cover rounded-lg border border-blue-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(idx)}
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  ✕
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs text-center rounded-b-lg py-0.5">
+                  {idx + 1}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 辨識按鈕 */}
+        {photoFiles.length > 0 && (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleOcr}
+              disabled={loading}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? `⏳ ${loadingProgress || '辨識中...'}` : `🤖 AI 辨識（${photoFiles.length} 張）`}
+            </button>
+            {items.length > 0 && (
+              <span className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg">
+                共辨識出 {items.length} 張憑證
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 儲存成功訊息 */}
