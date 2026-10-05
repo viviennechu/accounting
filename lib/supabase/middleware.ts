@@ -31,7 +31,7 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const publicPaths = ['/login', '/register', '/auth/', '/reset-password']
+  const publicPaths = ['/login', '/auth/', '/reset-password'] // 2026-10-05 拿掉自助註冊：新人由管理員在用戶管理新增
   const isPublic = publicPaths.some(p => pathname.startsWith(p))
 
   // 未登入且不在公開頁，導向登入
