@@ -86,6 +86,7 @@ interface InvoiceItem {
   cashAccountId: string
   skip: boolean
   croppedFile?: File
+  sourceFile?: File // 這張憑證來自哪一張原始照片（沒裁切時上傳它）
   croppedPreview?: string
   duplicate?: { id: string; date: string; description: string | null } | null
   customValues: Record<string, string>
@@ -201,6 +202,7 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
               cashAccountId: cashAccounts[0]?.id || '',
               skip: false,
               croppedFile,
+              sourceFile: photoFile,
               croppedPreview,
               customValues: {},
             }
@@ -275,7 +277,7 @@ export default function BatchInvoiceUpload({ accounts, branches, defaultBranchId
     for (const item of toSave) {
       // 每張憑證上傳自己的裁切照片，沒有裁切才用原始
       let attachmentUrl: string | null = null
-      const uploadFile = item.croppedFile || photoFile
+      const uploadFile = item.croppedFile || item.sourceFile
       if (uploadFile) {
         const path = `${branchId}/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`
         const { error: uploadError } = await supabase.storage
